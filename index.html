@@ -6,7 +6,7 @@
   ║  Built as a self-contained single-file PWA                   ║
   ║                                                              ║
   ║  Author  : Ryan                                              ║
-  ║  Version : 29.0                                              ║
+  ║  Version : 44.0                                              ║
   ║  Updated : July 2026                                         ║
   ║  Stack   : Vanilla HTML/CSS/JS · TMDB API · VidSrc Player    ║
   ║                                                              ║
@@ -88,7 +88,217 @@
       --shadow: 0 8px 32px rgba(0,0,0,0.6);
       --shadow-card: 0 4px 20px rgba(0,0,0,0.5);
       --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+      /* ── v43 Extended Theme Variables ── */
+      --nav-blur: blur(20px);
+      --font-weight-ui: 600;
+      --hero-gradient: linear-gradient(to right, rgba(10,10,15,0.95) 40%, transparent);
+      --card-border: 1px solid rgba(255,255,255,0.07);
+      --btn-radius: 8px;
+      --text-glow: none;
+      /* -- v44 Layout Engine Variables -- */
+      --card-aspect: 2/3;
+      --card-width: 140px;
     }
+
+    /* ================================================
+       v44 THEME LAYOUT ENGINE - per-preset structural overrides
+       ================================================ */
+
+    /* -- NETFLIX: Wide landscape cards, sharp corners, bold -- */
+    html[data-layout="netflix"] .card-poster { aspect-ratio: 16/9; }
+    html[data-layout="netflix"] .row-scroll .card { flex: 0 0 220px; }
+    html[data-layout="netflix"] .card { border-radius: 4px; }
+    html[data-layout="netflix"] .card:hover { transform: scale(1.06); box-shadow: 0 12px 40px rgba(229,9,20,0.4); }
+    html[data-layout="netflix"] .card-info { padding: 8px 10px 10px; }
+    html[data-layout="netflix"] .card-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    html[data-layout="netflix"] .section-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--text-secondary); }
+    html[data-layout="netflix"] .section-title::after { display: none; }
+    html[data-layout="netflix"] .bottom-nav { border-top: 1px solid #333; }
+    html[data-layout="netflix"] .nav-item.active::before { height: 2px; top: 0; bottom: auto; border-radius: 0; }
+    html[data-layout="netflix"] .card-type-badge { border-radius: 2px; font-size: 8px; }
+    html[data-layout="netflix"] .card-rating { border-radius: 2px; }
+
+    /* -- DISNEY+: Portrait cards with ring highlight, rounded -- */
+    html[data-layout="disney"] .card-poster { aspect-ratio: 2/3; }
+    html[data-layout="disney"] .row-scroll .card { flex: 0 0 130px; }
+    html[data-layout="disney"] .card { border-radius: 12px; border: 2px solid transparent; transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; }
+    html[data-layout="disney"] .card:hover { transform: translateY(-4px) scale(1.03); border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow), 0 12px 32px rgba(0,99,229,0.35); }
+    html[data-layout="disney"] .card-title { font-size: 12px; font-weight: 600; text-align: center; }
+    html[data-layout="disney"] .card-meta { text-align: center; }
+    html[data-layout="disney"] .card-info { padding: 8px 6px 10px; }
+    html[data-layout="disney"] .section-title { font-size: 18px; font-weight: 800; background: linear-gradient(90deg, #0063e5, #00d4ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    html[data-layout="disney"] .nav-item.active::before { height: 3px; border-radius: 3px; }
+    html[data-layout="disney"] .nav-item { gap: 4px; }
+
+    /* -- HBO: Tall cinematic cards, gold accents, serif feel -- */
+    html[data-layout="hbo"] .card-poster { aspect-ratio: 2/3; }
+    html[data-layout="hbo"] .row-scroll .card { flex: 0 0 150px; }
+    html[data-layout="hbo"] .card { border-radius: 4px; border: 1px solid rgba(201,168,76,0.15); }
+    html[data-layout="hbo"] .card:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(201,168,76,0.25); }
+    html[data-layout="hbo"] .card-overlay { background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 60%); opacity: 1 !important; }
+    html[data-layout="hbo"] .card-play-btn { opacity: 0; transition: opacity 0.3s ease; }
+    html[data-layout="hbo"] .card:hover .card-play-btn { opacity: 1; }
+    html[data-layout="hbo"] .card-title { font-size: 13px; font-weight: 700; font-variant: small-caps; letter-spacing: 0.5px; }
+    html[data-layout="hbo"] .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: var(--accent); border-bottom: 1px solid rgba(201,168,76,0.3); padding-bottom: 8px; }
+    html[data-layout="hbo"] .section-title::after { display: none; }
+    html[data-layout="hbo"] .nav-label { display: block !important; font-size: 11px; }
+
+    /* -- APPLE TV+: Minimal, landscape, lots of whitespace -- */
+    html[data-layout="appletv"] .card-poster { aspect-ratio: 16/9; }
+    html[data-layout="appletv"] .row-scroll .card { flex: 0 0 200px; }
+    html[data-layout="appletv"] .card { border-radius: 18px; border: none; background: #1c1c1e; }
+    html[data-layout="appletv"] .card:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+    html[data-layout="appletv"] .card-type-badge { display: none; }
+    html[data-layout="appletv"] .card-rating { font-size: 10px; font-weight: 400; color: #aeaeb2; background: transparent; backdrop-filter: none; padding: 0; bottom: 6px; left: 10px; }
+    html[data-layout="appletv"] .card-title { font-size: 13px; font-weight: 400; color: #f5f5f7; letter-spacing: -0.2px; }
+    html[data-layout="appletv"] .card-meta { font-size: 11px; color: #6e6e73; }
+    html[data-layout="appletv"] .card-info { padding: 12px 12px 14px; }
+    html[data-layout="appletv"] .section-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: #f5f5f7; }
+    html[data-layout="appletv"] .section-title::after { display: none; }
+    html[data-layout="appletv"] .nav-item svg { width: 24px; height: 24px; }
+    html[data-layout="appletv"] .nav-label { font-size: 9px; font-weight: 400; }
+
+    /* -- CRUNCHYROLL: Compact landscape, anime style, orange energy -- */
+    html[data-layout="crunchyroll"] .card-poster { aspect-ratio: 16/9; }
+    html[data-layout="crunchyroll"] .row-scroll .card { flex: 0 0 160px; }
+    html[data-layout="crunchyroll"] .card { border-radius: 6px; }
+    html[data-layout="crunchyroll"] .card:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 6px 20px rgba(244,117,33,0.3); }
+    html[data-layout="crunchyroll"] .card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+    html[data-layout="crunchyroll"] .card-info { padding: 6px 8px 8px; }
+    html[data-layout="crunchyroll"] .section-title { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); }
+    html[data-layout="crunchyroll"] .section-title::after { background: var(--accent); height: 3px; border-radius: 0; }
+    html[data-layout="crunchyroll"] .nav-item.active { background: var(--accent); border-radius: 8px; color: #000; }
+    html[data-layout="crunchyroll"] .nav-item.active::before { display: none; }
+
+    /* -- AMAZON PRIME: Landscape cards, info-dense, blue -- */
+    html[data-layout="prime"] .card-poster { aspect-ratio: 16/9; }
+    html[data-layout="prime"] .row-scroll .card { flex: 0 0 190px; }
+    html[data-layout="prime"] .card { border-radius: 8px; }
+    html[data-layout="prime"] .card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 8px 28px rgba(0,168,225,0.25); }
+    html[data-layout="prime"] .card-title { font-size: 12px; font-weight: 600; }
+    html[data-layout="prime"] .section-title { font-size: 15px; font-weight: 700; color: #00a8e1; }
+    html[data-layout="prime"] .section-title::after { background: #00a8e1; }
+    html[data-layout="prime"] .nav-item.active::before { height: 2px; border-radius: 0; }
+
+    /* -- SAKURA: Rounded portrait, soft pink, dreamy -- */
+    html[data-layout="sakura"] .card-poster { aspect-ratio: 2/3; }
+    html[data-layout="sakura"] .row-scroll .card { flex: 0 0 130px; }
+    html[data-layout="sakura"] .card { border-radius: 20px; border: 1px solid rgba(255,107,157,0.2); }
+    html[data-layout="sakura"] .card:hover { transform: translateY(-6px) scale(1.04); box-shadow: 0 12px 40px rgba(255,107,157,0.3); }
+    html[data-layout="sakura"] .card-title { font-size: 12px; font-weight: 500; text-align: center; }
+    html[data-layout="sakura"] .card-info { padding: 8px 6px 10px; text-align: center; }
+    html[data-layout="sakura"] .section-title { font-size: 17px; font-weight: 600; color: #ff6b9d; }
+    html[data-layout="sakura"] .section-title::after { background: linear-gradient(90deg, #ff6b9d, transparent); }
+    html[data-layout="sakura"] .nav-item.active::before { height: 3px; border-radius: 3px; background: linear-gradient(90deg, #ff6b9d, #e05585); }
+
+    /* -- CYBERPUNK: Sharp edges, neon glow -- */
+    html[data-layout="cyberpunk"] .card-poster { aspect-ratio: 16/9; }
+    html[data-layout="cyberpunk"] .row-scroll .card { flex: 0 0 200px; }
+    html[data-layout="cyberpunk"] .card { border-radius: 2px; border: 1px solid rgba(0,255,245,0.3); }
+    html[data-layout="cyberpunk"] .card:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(0,255,245,0.4), 0 0 40px rgba(255,0,255,0.2); border-color: #00fff5; }
+    html[data-layout="cyberpunk"] .card-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #00fff5; }
+    html[data-layout="cyberpunk"] .card-meta { color: #ff00ff; font-size: 10px; }
+    html[data-layout="cyberpunk"] .section-title { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; color: #00fff5; text-shadow: 0 0 10px rgba(0,255,245,0.6); }
+    html[data-layout="cyberpunk"] .section-title::after { background: linear-gradient(90deg, #00fff5, #ff00ff); height: 2px; }
+    html[data-layout="cyberpunk"] .nav-item.active { color: #00fff5; text-shadow: 0 0 8px rgba(0,255,245,0.8); }
+    html[data-layout="cyberpunk"] .nav-item.active::before { background: linear-gradient(90deg, #00fff5, #ff00ff); }
+
+    /* -- OCEAN: Landscape cards, deep blue, fluid -- */
+    html[data-layout="ocean"] .card-poster { aspect-ratio: 16/9; }
+    html[data-layout="ocean"] .row-scroll .card { flex: 0 0 190px; }
+    html[data-layout="ocean"] .card { border-radius: 14px; }
+    html[data-layout="ocean"] .card:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(0,180,216,0.3); }
+    html[data-layout="ocean"] .section-title { font-size: 17px; font-weight: 700; color: #00b4d8; }
+    html[data-layout="ocean"] .section-title::after { background: linear-gradient(90deg, #00b4d8, transparent); }
+
+    /* -- MIDNIGHT: Portrait, purple glow, mystical -- */
+    html[data-layout="midnight"] .card-poster { aspect-ratio: 2/3; }
+    html[data-layout="midnight"] .row-scroll .card { flex: 0 0 130px; }
+    html[data-layout="midnight"] .card { border-radius: 14px; }
+    html[data-layout="midnight"] .card:hover { transform: translateY(-6px) scale(1.03); box-shadow: 0 12px 40px rgba(168,85,247,0.35); }
+    html[data-layout="midnight"] .section-title { font-size: 17px; font-weight: 700; color: #a855f7; }
+    html[data-layout="midnight"] .section-title::after { background: linear-gradient(90deg, #a855f7, transparent); }
+
+    /* -- MARVEL: Bold portrait, red power, dramatic -- */
+    html[data-layout="marvel"] .card-poster { aspect-ratio: 2/3; }
+    html[data-layout="marvel"] .row-scroll .card { flex: 0 0 140px; }
+    html[data-layout="marvel"] .card { border-radius: 6px; border: 1px solid rgba(237,29,36,0.2); }
+    html[data-layout="marvel"] .card:hover { transform: scale(1.05); box-shadow: 0 8px 32px rgba(237,29,36,0.4); }
+    html[data-layout="marvel"] .card-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    html[data-layout="marvel"] .section-title { font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: #ed1d24; }
+    html[data-layout="marvel"] .section-title::after { background: #ed1d24; height: 3px; border-radius: 0; }
+
+    /* -- GOLDEN CINEMA: Landscape, warm gold, premium -- */
+    html[data-layout="golden"] .card-poster { aspect-ratio: 16/9; }
+    html[data-layout="golden"] .row-scroll .card { flex: 0 0 200px; }
+    html[data-layout="golden"] .card { border-radius: 8px; border: 1px solid rgba(251,191,36,0.2); }
+    html[data-layout="golden"] .card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(251,191,36,0.25); }
+    html[data-layout="golden"] .card-title { font-size: 13px; font-weight: 700; font-variant: small-caps; }
+    html[data-layout="golden"] .section-title { font-size: 16px; font-weight: 700; color: #fbbf24; font-variant: small-caps; letter-spacing: 1px; }
+    html[data-layout="golden"] .section-title::after { background: linear-gradient(90deg, #fbbf24, transparent); }
+
+    /* -- FOREST: Portrait, green nature, organic -- */
+    html[data-layout="forest"] .card-poster { aspect-ratio: 2/3; }
+    html[data-layout="forest"] .row-scroll .card { flex: 0 0 130px; }
+    html[data-layout="forest"] .card { border-radius: 10px; }
+    html[data-layout="forest"] .card:hover { transform: translateY(-5px) scale(1.03); box-shadow: 0 10px 32px rgba(34,197,94,0.25); }
+    html[data-layout="forest"] .section-title { font-size: 16px; font-weight: 700; color: #22c55e; }
+    html[data-layout="forest"] .section-title::after { background: linear-gradient(90deg, #22c55e, transparent); }
+
+    /* -- ARCTIC: Light mode, portrait, clean minimal -- */
+    html[data-layout="arctic"] .card-poster { aspect-ratio: 2/3; }
+    html[data-layout="arctic"] .row-scroll .card { flex: 0 0 130px; }
+    html[data-layout="arctic"] .card { border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
+    html[data-layout="arctic"] .card:hover { transform: translateY(-6px); box-shadow: 0 12px 40px rgba(59,130,246,0.2); }
+    html[data-layout="arctic"] .card-title { font-size: 12px; font-weight: 500; color: #0f172a; }
+    html[data-layout="arctic"] .card-meta { color: #64748b; }
+    html[data-layout="arctic"] .section-title { font-size: 18px; font-weight: 600; color: #0f172a; }
+    html[data-layout="arctic"] .section-title::after { background: #3b82f6; }
+
+    /* -- SUNSET: Landscape, warm orange, vibrant -- */
+    html[data-layout="sunset"] .card-poster { aspect-ratio: 16/9; }
+    html[data-layout="sunset"] .row-scroll .card { flex: 0 0 190px; }
+    html[data-layout="sunset"] .card { border-radius: 12px; }
+    html[data-layout="sunset"] .card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 10px 36px rgba(249,115,22,0.3); }
+    html[data-layout="sunset"] .section-title { font-size: 17px; font-weight: 700; color: #f97316; }
+    html[data-layout="sunset"] .section-title::after { background: linear-gradient(90deg, #f97316, transparent); }
+
+    /* -- SPOTIFY: Square cards, music-app feel -- */
+    html[data-layout="spotify"] .card-poster { aspect-ratio: 1/1; }
+    html[data-layout="spotify"] .row-scroll .card { flex: 0 0 150px; }
+    html[data-layout="spotify"] .card { border-radius: 8px; }
+    html[data-layout="spotify"] .card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 8px 28px rgba(29,185,84,0.3); }
+    html[data-layout="spotify"] .card-title { font-size: 13px; font-weight: 700; }
+    html[data-layout="spotify"] .card-meta { font-size: 11px; color: #b3b3b3; }
+    html[data-layout="spotify"] .section-title { font-size: 22px; font-weight: 700; color: #fff; }
+    html[data-layout="spotify"] .section-title::after { display: none; }
+    html[data-layout="spotify"] .nav-item.active { color: #1db954; }
+    html[data-layout="spotify"] .nav-item.active::before { background: #1db954; }
+
+    /* -- DEFAULT: Portrait, balanced -- */
+    html[data-layout="default"] .card-poster,
+    html:not([data-layout]) .card-poster { aspect-ratio: 2/3; }
+    html[data-layout="default"] .row-scroll .card,
+    html:not([data-layout]) .row-scroll .card { flex: 0 0 140px; }
+
+    /* Section title shared base */
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 12px 0;
+      position: relative;
+      display: inline-block;
+    }
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 0;
+      width: 32px; height: 3px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
     html { scroll-behavior: smooth; }
     body {
       font-family: 'Inter', sans-serif;
@@ -273,14 +483,15 @@
        BOTTOM NAVIGATION — Mobile tab bar
        ======================================== */
     .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      position: fixed; bottom: 0; left: 0; right: 0;
       height: var(--nav-h);
-      background: rgba(17,17,24,0.97);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(var(--bg-primary-rgb, 10,10,15), 0.85);
+      backdrop-filter: var(--nav-blur, blur(20px));
+      -webkit-backdrop-filter: var(--nav-blur, blur(20px));
       border-top: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-around;
-      padding: 0 8px;
+      display: flex; align-items: stretch;
+      z-index: 100;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.4);
     }
     .nav-item {
       flex: 1;
@@ -298,10 +509,12 @@
     .nav-item.active::before {
       content: '';
       position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-      width: 32px; height: 2px;
+      width: 32px; height: 3px;
       background: var(--accent);
       border-radius: 0 0 4px 4px;
+      box-shadow: 0 0 10px var(--accent-glow);
     }
+    .nav-item.active .nav-icon, .nav-item.active svg { filter: drop-shadow(0 0 4px var(--accent-glow)); }
     .nav-item:hover:not(.active) { color: var(--text-secondary); }
 
     /* ========================================
@@ -332,19 +545,9 @@
     }
     .hero-overlay {
       position: absolute; inset: 0;
-      background: linear-gradient(
-        to right,
-        rgba(10,10,15,0.95) 0%,
-        rgba(10,10,15,0.7) 40%,
-        rgba(10,10,15,0.2) 70%,
-        rgba(10,10,15,0.05) 100%
-      ),
-      linear-gradient(
-        to top,
-        rgba(10,10,15,1) 0%,
-        rgba(10,10,15,0.4) 30%,
-        transparent 60%
-      );
+      background: var(--hero-gradient, linear-gradient(to right, rgba(10,10,15,0.95) 40%, transparent)),
+                  linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 40%);
+      z-index: 1;
     }
     .hero-content {
       position: absolute;
@@ -381,12 +584,16 @@
     }
     .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
     .btn-play {
-      display: flex; align-items: center; gap: 8px;
-      padding: 12px 28px;
-      background: var(--accent); color: #000;
-      border-radius: var(--radius);
-      font-weight: 700; font-size: 15px;
-      transition: all var(--transition);
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent);
+      color: #000;
+      border: none; cursor: pointer;
+      padding: 12px 24px;
+      border-radius: var(--btn-radius, 8px);
+      font-size: 15px; font-weight: 800;
+      letter-spacing: 0.3px;
+      transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 4px 16px var(--accent-glow);
     }
     .btn-play:hover { background: #f5cc6a; transform: translateY(-2px); box-shadow: 0 8px 24px var(--accent-glow); }
     .btn-info {
@@ -437,8 +644,19 @@
       padding: 0 20px; margin-bottom: 16px;
     }
     .section-title {
-      font-size: 18px; font-weight: 700; letter-spacing: 0.5px;
+      font-size: 18px;
+      font-weight: var(--font-weight-ui, 700);
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
       display: flex; align-items: center; gap: 8px;
+      text-shadow: var(--text-glow, none);
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--accent-dim), transparent);
+      margin-left: 8px;
     }
     .section-title::before {
       content: ''; display: block;
@@ -521,10 +739,13 @@
       border-radius: var(--radius);
       overflow: hidden;
       background: var(--bg-card);
-      transition: transform var(--transition), box-shadow var(--transition);
+      border: var(--card-border, 1px solid rgba(255,255,255,0.07));
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease, border-color 0.3s ease;
       position: relative;
+      will-change: transform;
     }
-    .card:hover { transform: translateY(-4px) scale(1.02); box-shadow: var(--shadow); }
+    .card:hover { transform: translateY(-6px) scale(1.04); box-shadow: var(--shadow-card), 0 0 0 1px var(--accent-glow); }
+    .card:active { transform: translateY(-2px) scale(1.01); }
     .card-poster {
       position: relative;
       aspect-ratio: 2/3;
@@ -532,29 +753,42 @@
       overflow: hidden;
     }
     .card-poster img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-    .card:hover .card-poster img { transform: scale(1.05); }
+    .card:hover .card-poster img { transform: scale(1.08); }
+    /* Bottom gradient for badge readability */
+    .card-poster::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 40%;
+      background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
+      pointer-events: none; z-index: 1;
+    }
     .card-poster-placeholder {
       width: 100%; height: 100%;
       display: flex; align-items: center; justify-content: center;
       font-size: 40px; color: var(--text-muted);
     }
     .card-rating {
-      position: absolute; top: 8px; left: 8px;
-      background: rgba(0,0,0,0.8);
+      position: absolute; bottom: 8px; left: 8px;
+      background: rgba(0,0,0,0.82);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       padding: 3px 8px; border-radius: 6px;
       font-size: 11px; font-weight: 700; color: var(--accent);
+      z-index: 4; pointer-events: none;
     }
     .card-type-badge {
       position: absolute; top: 8px; right: 8px;
       background: var(--accent); color: #000;
       padding: 2px 7px; border-radius: 5px;
       font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+      z-index: 4; pointer-events: none;
     }
     .card-overlay {
       position: absolute; inset: 0;
       background: rgba(0,0,0,0.5);
       display: flex; align-items: center; justify-content: center;
       opacity: 0; transition: opacity var(--transition);
+      z-index: 2;
     }
     .card:hover .card-overlay { opacity: 1; }
     .card-play-btn {
@@ -577,7 +811,7 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 14px;
       opacity: 0; transition: opacity var(--transition);
-      z-index: 2;
+      z-index: 5;
     }
     .card:hover .card-wl-btn { opacity: 1; }
     .card-wl-btn.in-wl { opacity: 1; color: var(--red); }
@@ -585,7 +819,60 @@
     /* ========================================
        SKELETON — Loading placeholder animations
        ======================================== */
+    /* ── Glass-morphism card variant ── */
+    .card-glass {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    /* ── Premium skeleton pulse ── */
     .skeleton { background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius); }
+    .skeleton-hero {
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, #0a0a0f 25%, #1a1a2a 50%, #0a0a0f 75%);
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite;
+    }
+    /* ── Card rating badge (alias) ── */
+    .card-rating-badge {
+      position: absolute; bottom: 6px; left: 6px;
+      background: rgba(0,0,0,0.82);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--accent);
+      font-size: 10px; font-weight: 700;
+      padding: 2px 6px; border-radius: 4px;
+      display: flex; align-items: center; gap: 2px;
+      z-index: 4; pointer-events: none;
+    }
+    /* ── Card type badge (second definition — top-right) ── */
+    .card-type-badge {
+      position: absolute; top: 6px; right: 6px;
+      background: var(--accent);
+      color: #000;
+      font-size: 9px; font-weight: 800;
+      padding: 2px 5px; border-radius: 3px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      z-index: 4; pointer-events: none;
+    }
+    /* ── Hero genre badge ── */
+    .hero-genre-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff; font-size: 11px; font-weight: 600;
+      padding: 3px 10px; border-radius: 20px;
+      margin-right: 6px; margin-bottom: 6px;
+    }
+    /* ── Cyberpunk scanline effect ── */
+    body.theme-cyberpunk::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,245,0.015) 2px, rgba(0,255,245,0.015) 4px);
+      pointer-events: none; z-index: 9999;
+    }
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     .skeleton-card { flex: 0 0 140px; }
     .skeleton-poster { aspect-ratio: 2/3; width: 100%; }
@@ -1446,7 +1733,7 @@
     }
     .top-nav-item svg { width: 18px; height: 18px; }
     .top-nav-item:hover { color: var(--text-primary); background: rgba(255,255,255,0.06); }
-    .top-nav-item.active { color: var(--accent); background: rgba(232,184,75,0.1); }
+    .top-nav-item.active { color: var(--accent); background: var(--accent-dim); font-weight: 700; border-bottom: 2px solid var(--accent); }
     .top-nav-search-btn {
       display: flex; align-items: center; gap: 6px;
       padding: 8px 16px; border-radius: 8px;
@@ -1575,8 +1862,9 @@
       transition: all var(--transition);
     }
     .theme-reset-btn:hover { background: rgba(255,255,255,0.1); }
-    .theme-preset-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.25); color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
-    .theme-preset-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.5); }
+    .theme-preset-btn { padding: 7px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.25); color: #fff; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1); text-shadow: 0 1px 3px rgba(0,0,0,0.8); white-space: nowrap; }
+    .theme-preset-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 6px 16px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.6); }
+    .theme-preset-btn:active { transform: translateY(-1px) scale(1.02); }
     .bg-preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 10px; padding: 4px 0; }
     .bg-preset-item { cursor: pointer; border-radius: 10px; overflow: hidden; border: 2px solid transparent; transition: all 0.2s; }
     .bg-preset-item:hover { border-color: rgba(255,255,255,0.3); transform: translateY(-2px); }
@@ -2181,11 +2469,23 @@ div[style*="z-index:2147483647"] { display:none!important; }
           <div style="margin-bottom:14px;">
             <div class="theme-color-label" style="margin-bottom:8px;" id="set-themePresets">Theme Presets</div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="theme-preset-btn" onclick="applyThemePreset('default')" style="background:linear-gradient(135deg,#e8b84b,#0a0a0f)">Default</button>
-              <button class="theme-preset-btn" onclick="applyThemePreset('netflix')" style="background:linear-gradient(135deg,#e50914,#141414)">Netflix</button>
-              <button class="theme-preset-btn" onclick="applyThemePreset('disney')" style="background:linear-gradient(135deg,#0063e5,#040714)">Disney</button>
-              <button class="theme-preset-btn" onclick="applyThemePreset('spotify')" style="background:linear-gradient(135deg,#1db954,#121212)">Spotify</button>
-              <button class="theme-preset-btn" onclick="applyThemePreset('sakura')" style="background:linear-gradient(135deg,#ff6b9d,#1a0a2e)">Sakura</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('default')" style="background:linear-gradient(135deg,#e8b84b,#0a0a0f)">⭐ Default</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('netflix')" style="background:linear-gradient(135deg,#e50914,#141414)">🎬 Netflix</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('sakura')" style="background:linear-gradient(135deg,#ff6b9d,#0d0515)">🌸 Sakura</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('ocean')" style="background:linear-gradient(135deg,#00b4d8,#03071e)">🌊 Ocean</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('midnight')" style="background:linear-gradient(135deg,#a855f7,#07020f)">🌙 Midnight</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('forest')" style="background:linear-gradient(135deg,#22c55e,#020d06)">🌿 Forest</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('golden')" style="background:linear-gradient(135deg,#fbbf24,#0c0800)">🏆 Golden</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('cyberpunk')" style="background:linear-gradient(135deg,#00fff5,#000510);color:#000">⚡ Cyberpunk</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('arctic')" style="background:linear-gradient(135deg,#3b82f6,#f0f4f8);color:#0f172a">❄️ Arctic</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('sunset')" style="background:linear-gradient(135deg,#f97316,#0f0500)">🌅 Sunset</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('marvel')" style="background:linear-gradient(135deg,#ed1d24,#0a0000)">🦸 Marvel</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('disney')" style="background:linear-gradient(135deg,#0063e5,#040714)">✨ Disney+</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('hbo')" style="background:linear-gradient(135deg,#c9a84c,#0a0800)">👑 HBO</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('crunchyroll')" style="background:linear-gradient(135deg,#f47521,#0a0500)">🍥 Crunchyroll</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('prime')" style="background:linear-gradient(135deg,#00a8e1,#0f171e)">📦 Prime</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('appletv')" style="background:linear-gradient(135deg,#ffffff,#000000);color:#000">🍎 Apple TV+</button>
+              <button class="theme-preset-btn" onclick="applyThemePreset('spotify')" style="background:linear-gradient(135deg,#1db954,#121212)">🎵 Spotify</button>
             </div>
           </div>
           <div class="theme-color-grid">
@@ -2406,14 +2706,14 @@ div[style*="z-index:2147483647"] { display:none!important; }
         <div class="settings-row">
           <div>
             <div class="settings-row-label">WipeStream</div>
-            <div class="settings-row-sub" id="set-version">Versi 7.0.0 — Premium Streaming</div>
+            <div class="settings-row-sub" id="set-version">Versi 47.0 — Premium Streaming</div>
           </div>
-          <span class="settings-badge">✨ v7.0</span>
+          <span class="settings-badge">✨ v8.0</span>
         </div>
         <div class="settings-row">
           <div>
             <div class="settings-row-label" id="set-videoSrc">Sumber Video</div>
-            <div class="settings-row-sub">vidsrc.sbs</div>
+            <div class="settings-row-sub">vidsrc.sbs + vidsrc.in (1 server)</div>
           </div>
           <span class="settings-badge">🎬 Live</span>
         </div>
@@ -2613,6 +2913,7 @@ const TMDB_BASE = 'https://api.themoviedb.org/3';
 const IMG_BASE = 'https://image.tmdb.org/t/p/';
 const VIDSRC = 'https://vidsrc.sbs/embed';
 
+
 // ========================================
 // COUNTRIES LIST — ISO country codes
 // ========================================
@@ -2652,7 +2953,7 @@ const I18N = {
     setOrigLang: 'Bahasa Asli Film', setOrigLangSub: 'Tampilkan film dengan bahasa asli tertentu',
     setUATitle: '🌐 User Agent', setUAPreset: 'Preset User Agent', setUAPresetSub: 'Pilih preset atau masukkan custom',
     setUACustom: 'Custom User Agent', setAbout: 'ℹ️ Tentang Aplikasi',
-    setVersion: 'Versi 30.0 — Premium Streaming', setVideoSrc: 'Sumber Video',
+    setVersion: 'Versi 47.0 — Premium Streaming', setVideoSrc: 'Sumber Video',
     setDataSource: 'Data Film', setAdblock: 'Ad Blocker', setAdblockSub: 'Built-in, aktif otomatis',
     setSaveBtn: '💾 Simpan Pengaturan', setGoWatchlist: '❤️ Watchlist Saya', setGoHistory: '🕐 History Nonton',
     wlTitle: '❤️ Watchlist', wlClear: '🗑️ Hapus Semua', histTitle: '🕐 History Nonton', histClear: '🗑️ Hapus Semua',
@@ -2689,7 +2990,7 @@ const I18N = {
     setOrigLang: 'Original Language', setOrigLangSub: 'Show films with a specific original language',
     setUATitle: '🌐 User Agent', setUAPreset: 'User Agent Preset', setUAPresetSub: 'Choose a preset or enter custom',
     setUACustom: 'Custom User Agent', setAbout: 'ℹ️ About',
-    setVersion: 'Version 37.0 — Premium Streaming', setVideoSrc: 'Video Source',
+    setVersion: 'Version 47.0 — Premium Streaming', setVideoSrc: 'Video Source',
     setDataSource: 'Movie Data', setAdblock: 'Ad Blocker', setAdblockSub: 'Built-in, always active',
     setSaveBtn: '💾 Save Settings', setGoWatchlist: '❤️ My Watchlist', setGoHistory: '🕐 Watch History',
     wlTitle: '❤️ Watchlist', wlClear: '🗑️ Clear All', histTitle: '🕐 Watch History', histClear: '🗑️ Clear All',
@@ -3422,14 +3723,19 @@ function cardHTML(item, type) {
   const title = item.title || item.name || 'Unknown';
   const year = (item.release_date || item.first_air_date || '').slice(0, 4);
   const rating = item.vote_average ? item.vote_average.toFixed(1) : '—';
-  const poster = imgUrl(item.poster_path, 'w342');
   const typeBadge = mediaType === 'tv' ? 'TV' : 'Film';
   const inWL = isInWatchlist(item.id, mediaType);
+  // v45: Smart image selection - landscape layouts use backdrop_path to avoid portrait-crop
+  const LANDSCAPE_LAYOUTS = new Set(['netflix','appletv','crunchyroll','prime','cyberpunk','ocean','golden','sunset']);
+  const currentLayout = document.documentElement.dataset.layout || 'default';
+  const useBackdrop = LANDSCAPE_LAYOUTS.has(currentLayout) && !!item.backdrop_path;
+  const cardImgSrc = useBackdrop ? imgUrl(item.backdrop_path, 'w780') : (item.poster_path ? imgUrl(item.poster_path, 'w342') : null);
+  const cardImgFallback = (useBackdrop && item.poster_path) ? imgUrl(item.poster_path, 'w342') : null;
   return `
     <div class="card fade-in" data-ws-ui onclick="openDetail(${item.id}, '${mediaType}')">
       <div class="card-poster">
-        ${poster
-          ? `<img src="${poster}" alt="${title}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'card-poster-placeholder\\'>🎬</div>'">`
+        ${cardImgSrc
+          ? `<img src="${cardImgSrc}" alt="${title}" loading="lazy" onerror="${cardImgFallback ? `this.src='${cardImgFallback}';this.onerror=null` : `this.parentElement.innerHTML='<div class=\\'card-poster-placeholder\\'>🎬</div>'`}">`
           : `<div class="card-poster-placeholder">🎬</div>`}
         <div class="card-rating">⭐ ${rating}</div>
         <div class="card-type-badge">${typeBadge}</div>
@@ -3463,43 +3769,85 @@ function skeletonRow(n = 6) {
 let heroSlides = [], heroIdx = 0, heroTimer = null;
 let heroTouchStartX = 0, heroTouchStartY = 0;
 
+// Genre-aware hero: pick random genres each visit for fresh banners
+const HERO_GENRE_POOLS = [
+  { endpoint: '/trending/all/week', label: '🔥 Trending', params: {} },
+  { endpoint: '/movie/popular', label: '🎬 Popular Movies', params: { page: Math.ceil(Math.random()*3) } },
+  { endpoint: '/tv/popular', label: '📺 Popular Series', params: { page: Math.ceil(Math.random()*3) } },
+  { endpoint: '/discover/movie', label: '💥 Action', params: { with_genres: 28, sort_by: 'popularity.desc', page: Math.ceil(Math.random()*5) } },
+  { endpoint: '/discover/movie', label: '🚀 Sci-Fi', params: { with_genres: 878, sort_by: 'popularity.desc', page: Math.ceil(Math.random()*4) } },
+  { endpoint: '/discover/movie', label: '🎭 Drama', params: { with_genres: 18, sort_by: 'vote_average.desc', vote_count_gte: 500, page: 1 } },
+  { endpoint: '/discover/tv', label: '⚔️ Action & Adventure', params: { with_genres: 10759, sort_by: 'popularity.desc', page: Math.ceil(Math.random()*4) } },
+  { endpoint: '/discover/movie', label: '😂 Comedy', params: { with_genres: 35, sort_by: 'popularity.desc', page: Math.ceil(Math.random()*5) } },
+  { endpoint: '/movie/top_rated', label: '⭐ Top Rated', params: { page: Math.ceil(Math.random()*3) } },
+  { endpoint: '/discover/movie', label: '🌌 Fantasy', params: { with_genres: 14, sort_by: 'popularity.desc', page: Math.ceil(Math.random()*4) } },
+];
+
 async function loadHero() {
   const el = document.getElementById('heroSlides');
   const dotsEl = document.getElementById('heroDots');
-  el.innerHTML = `<div style="width:100%;height:100%;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px;">${t('loading')}</div>`;
+  // Show skeleton loader
+  el.innerHTML = `<div class="skeleton-hero" style="position:absolute;inset:0;"></div>`;
 
-  const data = await tmdb('/trending/all/week');
-  if (!data || !data.results) return;
+  // Pick 2-3 random genre pools and merge results for variety
+  const shuffled = [...HERO_GENRE_POOLS].sort(() => Math.random() - 0.5);
+  const picks = shuffled.slice(0, 3);
+  
+  let allItems = [];
+  for (const pool of picks) {
+    try {
+      const params = { ...pool.params };
+      if (params.page && typeof params.page === 'number') params.page = Math.max(1, Math.floor(params.page));
+      const data = await tmdb(pool.endpoint, params);
+      if (data && data.results) {
+        const items = data.results
+          .filter(i => i.backdrop_path && (i.overview || '').length > 20)
+          .map(i => ({ ...i, _heroLabel: pool.label }));
+        allItems = allItems.concat(items);
+      }
+    } catch(e) { /* skip failed pool */ }
+  }
 
-  heroSlides = data.results.filter(i => i.backdrop_path).slice(0, 6);
+  // Deduplicate by id, shuffle, take top 7
+  const seen = new Set();
+  allItems = allItems.filter(i => { if (seen.has(i.id)) return false; seen.add(i.id); return true; });
+  allItems = allItems.sort(() => Math.random() - 0.5).slice(0, 7);
+
+  if (!allItems.length) {
+    el.innerHTML = `<div style="width:100%;height:100%;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:14px;">${t('loading')}</div>`;
+    return;
+  }
+
+  heroSlides = allItems;
   el.innerHTML = '';
   dotsEl.innerHTML = '';
 
   heroSlides.forEach((item, i) => {
-    const mediaType = item.media_type || 'movie';
-    const title = item.title || item.name;
+    const mediaType = item.media_type || (item.first_air_date ? 'tv' : 'movie');
+    const title = item.title || item.name || 'Unknown';
     const year = (item.release_date || item.first_air_date || '').slice(0, 4);
     const rating = item.vote_average ? item.vote_average.toFixed(1) : '—';
-    const genres = item.genre_ids ? item.genre_ids.slice(0, 2).map(id => {
-      const g = [...movieGenres, ...tvGenres].find(g => g.id === id);
+    const genres = item.genre_ids ? item.genre_ids.slice(0, 3).map(id => {
+      const g = [...(movieGenres||[]), ...(tvGenres||[])].find(g => g.id === id);
       return g ? g.name : '';
-    }).filter(Boolean).join(' · ') : '';
+    }).filter(Boolean) : [];
 
     const slide = document.createElement('div');
     slide.className = 'hero-slide' + (i === 0 ? ' active' : '');
     slide.innerHTML = `
-      <img class="hero-bg" src="${imgUrl(item.backdrop_path, 'original')}" alt="${title}" loading="${i === 0 ? 'eager' : 'lazy'}" />
+      <img class="hero-bg" src="${imgUrl(item.backdrop_path, 'original')}" alt="${title.replace(/"/g,'&quot;')}" loading="${i === 0 ? 'eager' : 'lazy'}" />
       <div class="hero-overlay"></div>
       <div class="hero-content">
-        <div class="hero-badge">🔥 Trending #${i + 1}</div>
+        <div class="hero-badge">${item._heroLabel || '🔥 Featured'}</div>
         <h1 class="hero-title">${title}</h1>
         <div class="hero-meta">
           <div class="hero-rating">⭐ ${rating}</div>
           <div class="hero-dot"></div>
           <div class="hero-year">${year}</div>
-          ${genres ? `<div class="hero-dot"></div><div class="hero-genre">${genres}</div>` : ''}
+          ${genres.length ? `<div class="hero-dot"></div><div class="hero-genre">${genres.join(' · ')}</div>` : ''}
         </div>
-        <p class="hero-overview">${item.overview || 'Tidak ada sinopsis tersedia.'}</p>
+        ${genres.length ? `<div style="margin:8px 0 4px;display:flex;flex-wrap:wrap;">${genres.map(g=>`<span class="hero-genre-badge">${g}</span>`).join('')}</div>` : ''}
+        <p class="hero-overview">${(item.overview||'').slice(0,180)}${(item.overview||'').length>180?'…':''}</p>
         <div class="hero-actions">
           <button class="btn-play" onclick="openDetail(${item.id}, '${mediaType}')">
             <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M8 5v14l11-7z"/></svg>
@@ -4969,20 +5317,60 @@ function applyThemeColor(type, value) {
 }
 
 const THEME_PRESETS = {
-  default:  { accent: '#e8b84b', bg: '#0a0a0f', card: '#141420', secondary: '#c49a3a', border: '#2a2a3a', navbar: '#0d0d1a' },
-  netflix:  { accent: '#e50914', bg: '#141414', card: '#1f1f1f', secondary: '#b20710', border: '#2a2a2a', navbar: '#000000' },
-  disney:   { accent: '#0063e5', bg: '#040714', card: '#0d1117', secondary: '#0050b8', border: '#1a2030', navbar: '#040714' },
-  spotify:  { accent: '#1db954', bg: '#121212', card: '#181818', secondary: '#17a349', border: '#282828', navbar: '#000000' },
-  sakura:   { accent: '#ff6b9d', bg: '#1a0a2e', card: '#2a1040', secondary: '#e05585', border: '#3a1a50', navbar: '#120820' }
+  default:     { accent:'#e8b84b', bg:'#0a0a0f', card:'#141420', secondary:'#c49a3a', border:'#2a2a3a', navbar:'#0d0d1a', _radius:'12px', _radiusLg:'20px', _cardShadow:'0 4px 20px rgba(0,0,0,0.5)', _navBlur:'blur(20px)', _fontWeight:'600', _heroGrad:'linear-gradient(to right, rgba(10,10,15,0.95) 40%, transparent)', _cardBorder:'1px solid rgba(255,255,255,0.07)', _btnRadius:'8px', _accentGlow:'rgba(232,184,75,0.35)', _accentDim:'rgba(232,184,75,0.15)', _layout:'default' },
+  netflix:     { accent:'#e50914', bg:'#141414', card:'#1f1f1f', secondary:'#b20710', border:'#2a2a2a', navbar:'#000000', _radius:'4px', _radiusLg:'6px', _cardShadow:'0 6px 24px rgba(229,9,20,0.2)', _navBlur:'blur(0px)', _fontWeight:'700', _heroGrad:'linear-gradient(to right, rgba(20,20,20,0.98) 45%, transparent)', _cardBorder:'1px solid rgba(229,9,20,0.1)', _btnRadius:'4px', _accentGlow:'rgba(229,9,20,0.4)', _accentDim:'rgba(229,9,20,0.12)', _layout:'netflix' },
+  sakura:      { accent:'#ff6b9d', bg:'#0d0515', card:'#1a0a28', secondary:'#e05585', border:'#3a1050', navbar:'#0a0310', _radius:'16px', _radiusLg:'24px', _cardShadow:'0 8px 32px rgba(255,107,157,0.25)', _navBlur:'blur(24px)', _fontWeight:'500', _heroGrad:'linear-gradient(to right, rgba(13,5,21,0.96) 40%, transparent)', _cardBorder:'1px solid rgba(255,107,157,0.2)', _btnRadius:'50px', _accentGlow:'rgba(255,107,157,0.4)', _accentDim:'rgba(255,107,157,0.15)', _layout:'sakura' },
+  ocean:       { accent:'#00b4d8', bg:'#03071e', card:'#0a1628', secondary:'#0077b6', border:'#0d2040', navbar:'#020510', _radius:'14px', _radiusLg:'22px', _cardShadow:'0 8px 28px rgba(0,180,216,0.2)', _navBlur:'blur(20px)', _fontWeight:'600', _heroGrad:'linear-gradient(to right, rgba(3,7,30,0.97) 42%, transparent)', _cardBorder:'1px solid rgba(0,180,216,0.15)', _btnRadius:'10px', _accentGlow:'rgba(0,180,216,0.4)', _accentDim:'rgba(0,180,216,0.12)', _layout:'ocean' },
+  midnight:    { accent:'#a855f7', bg:'#07020f', card:'#120820', secondary:'#7c3aed', border:'#2a1040', navbar:'#050010', _radius:'12px', _radiusLg:'20px', _cardShadow:'0 8px 32px rgba(168,85,247,0.25)', _navBlur:'blur(22px)', _fontWeight:'600', _heroGrad:'linear-gradient(to right, rgba(7,2,15,0.97) 40%, transparent)', _cardBorder:'1px solid rgba(168,85,247,0.2)', _btnRadius:'8px', _accentGlow:'rgba(168,85,247,0.4)', _accentDim:'rgba(168,85,247,0.15)', _layout:'midnight' },
+  forest:      { accent:'#22c55e', bg:'#020d06', card:'#071a0e', secondary:'#16a34a', border:'#0d2a14', navbar:'#010804', _radius:'10px', _radiusLg:'16px', _cardShadow:'0 6px 24px rgba(34,197,94,0.2)', _navBlur:'blur(18px)', _fontWeight:'600', _heroGrad:'linear-gradient(to right, rgba(2,13,6,0.97) 42%, transparent)', _cardBorder:'1px solid rgba(34,197,94,0.15)', _btnRadius:'6px', _accentGlow:'rgba(34,197,94,0.35)', _accentDim:'rgba(34,197,94,0.12)', _layout:'forest' },
+  golden:      { accent:'#fbbf24', bg:'#0c0800', card:'#1a1200', secondary:'#d97706', border:'#2a1e00', navbar:'#080500', _radius:'8px', _radiusLg:'14px', _cardShadow:'0 8px 32px rgba(251,191,36,0.2)', _navBlur:'blur(16px)', _fontWeight:'700', _heroGrad:'linear-gradient(to right, rgba(12,8,0,0.97) 42%, transparent)', _cardBorder:'1px solid rgba(251,191,36,0.2)', _btnRadius:'6px', _accentGlow:'rgba(251,191,36,0.4)', _accentDim:'rgba(251,191,36,0.15)', _layout:'golden' },
+  cyberpunk:   { accent:'#00fff5', bg:'#000510', card:'#050a1a', secondary:'#ff00ff', border:'#0a1530', navbar:'#000208', _radius:'2px', _radiusLg:'4px', _cardShadow:'0 0 20px rgba(0,255,245,0.3), 0 0 40px rgba(255,0,255,0.1)', _navBlur:'blur(0px)', _fontWeight:'800', _heroGrad:'linear-gradient(to right, rgba(0,5,16,0.98) 40%, transparent)', _cardBorder:'1px solid rgba(0,255,245,0.3)', _btnRadius:'2px', _accentGlow:'rgba(0,255,245,0.5)', _accentDim:'rgba(0,255,245,0.1)', _layout:'cyberpunk' },
+  arctic:      { accent:'#3b82f6', bg:'#f0f4f8', card:'#ffffff', secondary:'#1d4ed8', border:'#e2e8f0', navbar:'rgba(240,244,248,0.9)', _radius:'16px', _radiusLg:'24px', _cardShadow:'0 4px 24px rgba(0,0,0,0.08)', _navBlur:'blur(20px)', _fontWeight:'500', _heroGrad:'linear-gradient(to right, rgba(240,244,248,0.97) 40%, transparent)', _cardBorder:'1px solid rgba(0,0,0,0.06)', _btnRadius:'12px', _accentGlow:'rgba(59,130,246,0.3)', _accentDim:'rgba(59,130,246,0.1)', _layout:'arctic' },
+  sunset:      { accent:'#f97316', bg:'#0f0500', card:'#1a0a00', secondary:'#ea580c', border:'#2a1200', navbar:'#080300', _radius:'12px', _radiusLg:'20px', _cardShadow:'0 8px 28px rgba(249,115,22,0.25)', _navBlur:'blur(20px)', _fontWeight:'600', _heroGrad:'linear-gradient(to right, rgba(15,5,0,0.97) 42%, transparent)', _cardBorder:'1px solid rgba(249,115,22,0.2)', _btnRadius:'8px', _accentGlow:'rgba(249,115,22,0.4)', _accentDim:'rgba(249,115,22,0.15)', _layout:'sunset' },
+  marvel:      { accent:'#ed1d24', bg:'#0a0000', card:'#180000', secondary:'#b91c1c', border:'#2a0000', navbar:'#050000', _radius:'6px', _radiusLg:'10px', _cardShadow:'0 6px 24px rgba(237,29,36,0.3)', _navBlur:'blur(16px)', _fontWeight:'800', _heroGrad:'linear-gradient(to right, rgba(10,0,0,0.98) 42%, transparent)', _cardBorder:'1px solid rgba(237,29,36,0.2)', _btnRadius:'4px', _accentGlow:'rgba(237,29,36,0.45)', _accentDim:'rgba(237,29,36,0.12)', _layout:'marvel' },
+  disney:      { accent:'#0063e5', bg:'#040714', card:'#0d1117', secondary:'#0050b8', border:'#1a2030', navbar:'#040714', _radius:'10px', _radiusLg:'16px', _cardShadow:'0 6px 24px rgba(0,99,229,0.25)', _navBlur:'blur(20px)', _fontWeight:'600', _heroGrad:'linear-gradient(to right, rgba(4,7,20,0.97) 42%, transparent)', _cardBorder:'1px solid rgba(0,99,229,0.2)', _btnRadius:'8px', _accentGlow:'rgba(0,99,229,0.4)', _accentDim:'rgba(0,99,229,0.12)', _layout:'disney' },
+  hbo:         { accent:'#c9a84c', bg:'#0a0800', card:'#141000', secondary:'#a07830', border:'#201800', navbar:'#060500', _radius:'4px', _radiusLg:'8px', _cardShadow:'0 8px 32px rgba(201,168,76,0.2)', _navBlur:'blur(12px)', _fontWeight:'700', _heroGrad:'linear-gradient(to right, rgba(10,8,0,0.98) 42%, transparent)', _cardBorder:'1px solid rgba(201,168,76,0.2)', _btnRadius:'4px', _accentGlow:'rgba(201,168,76,0.4)', _accentDim:'rgba(201,168,76,0.15)', _layout:'hbo' },
+  crunchyroll: { accent:'#f47521', bg:'#0a0500', card:'#1a0c00', secondary:'#d4621a', border:'#2a1200', navbar:'#060300', _radius:'8px', _radiusLg:'14px', _cardShadow:'0 6px 24px rgba(244,117,33,0.25)', _navBlur:'blur(18px)', _fontWeight:'700', _heroGrad:'linear-gradient(to right, rgba(10,5,0,0.97) 42%, transparent)', _cardBorder:'1px solid rgba(244,117,33,0.2)', _btnRadius:'6px', _accentGlow:'rgba(244,117,33,0.4)', _accentDim:'rgba(244,117,33,0.15)', _layout:'crunchyroll' },
+  prime:       { accent:'#00a8e1', bg:'#0f171e', card:'#1a2530', secondary:'#0080b0', border:'#1e3040', navbar:'#0a1018', _radius:'8px', _radiusLg:'14px', _cardShadow:'0 6px 24px rgba(0,168,225,0.2)', _navBlur:'blur(20px)', _fontWeight:'600', _heroGrad:'linear-gradient(to right, rgba(15,23,30,0.97) 42%, transparent)', _cardBorder:'1px solid rgba(0,168,225,0.15)', _btnRadius:'6px', _accentGlow:'rgba(0,168,225,0.35)', _accentDim:'rgba(0,168,225,0.12)', _layout:'prime' },
+  appletv:     { accent:'#ffffff', bg:'#000000', card:'#1c1c1e', secondary:'#aeaeb2', border:'#2c2c2e', navbar:'rgba(0,0,0,0.85)', _radius:'18px', _radiusLg:'28px', _cardShadow:'0 4px 20px rgba(0,0,0,0.6)', _navBlur:'blur(30px)', _fontWeight:'400', _heroGrad:'linear-gradient(to right, rgba(0,0,0,0.97) 42%, transparent)', _cardBorder:'1px solid rgba(255,255,255,0.08)', _btnRadius:'50px', _accentGlow:'rgba(255,255,255,0.2)', _accentDim:'rgba(255,255,255,0.08)', _layout:'appletv' },
+  spotify:     { accent:'#1db954', bg:'#121212', card:'#181818', secondary:'#17a349', border:'#282828', navbar:'#000000', _radius:'8px', _radiusLg:'14px', _cardShadow:'0 6px 24px rgba(29,185,84,0.2)', _navBlur:'blur(16px)', _fontWeight:'700', _heroGrad:'linear-gradient(to right, rgba(18,18,18,0.97) 42%, transparent)', _cardBorder:'1px solid rgba(29,185,84,0.1)', _btnRadius:'50px', _accentGlow:'rgba(29,185,84,0.35)', _accentDim:'rgba(29,185,84,0.12)', _layout:'spotify' }
 };
 
 function applyThemePreset(name) {
   const p = THEME_PRESETS[name];
   if (!p) return;
-  Object.entries(p).forEach(([k, v]) => applyThemeColor(k, v));
-  const idMap = { accent: 'colorAccent', bg: 'colorBg', card: 'colorCard', secondary: 'colorSecondary', border: 'colorBorder', navbar: 'colorNavbar' };
+  Object.entries(p).forEach(([k, v]) => { if (!k.startsWith('_')) applyThemeColor(k, v); });
+  const root = document.documentElement;
+  if (p._radius)      root.style.setProperty('--radius', p._radius);
+  if (p._radiusLg)    root.style.setProperty('--radius-lg', p._radiusLg);
+  if (p._cardShadow)  root.style.setProperty('--shadow-card', p._cardShadow);
+  if (p._navBlur)     root.style.setProperty('--nav-blur', p._navBlur);
+  if (p._fontWeight)  root.style.setProperty('--font-weight-ui', p._fontWeight);
+  if (p._heroGrad)    root.style.setProperty('--hero-gradient', p._heroGrad);
+  if (p._cardBorder)  root.style.setProperty('--card-border', p._cardBorder);
+  if (p._btnRadius)   root.style.setProperty('--btn-radius', p._btnRadius);
+  if (p._accentGlow)  root.style.setProperty('--accent-glow', p._accentGlow);
+  if (p._accentDim)   root.style.setProperty('--accent-dim', p._accentDim);
+  /* v44: set data-layout for structural CSS overrides */
+  root.setAttribute('data-layout', p._layout || name);
+  if (name === 'arctic') {
+    root.style.setProperty('--text-primary', '#0f172a');
+    root.style.setProperty('--text-secondary', '#475569');
+    root.style.setProperty('--text-muted', '#94a3b8');
+  } else {
+    root.style.setProperty('--text-primary', '#f0f0f5');
+    root.style.setProperty('--text-secondary', '#9090a8');
+    root.style.setProperty('--text-muted', '#5a5a72');
+  }
+  if (name === 'cyberpunk') {
+    root.style.setProperty('--text-glow', '0 0 8px rgba(0,255,245,0.6)');
+  } else {
+    root.style.setProperty('--text-glow', 'none');
+  }
+  const idMap = { accent:'colorAccent', bg:'colorBg', card:'colorCard', secondary:'colorSecondary', border:'colorBorder', navbar:'colorNavbar' };
   Object.entries(idMap).forEach(([k, id]) => { const el = document.getElementById(id); if (el && p[k]) el.value = p[k]; });
-  showToast('Theme: ' + name);
+  try { localStorage.setItem('ws_active_preset', name); } catch(e) {}
+  showToast('\u2728 Theme: ' + name.charAt(0).toUpperCase() + name.slice(1));
 }
 
 function resetThemeColors() {
@@ -5000,6 +5388,10 @@ function loadThemeColors() {
       const id = idMap[k]; const el = document.getElementById(id);
       if (el) el.value = v;
     });
+    /* v44: restore data-layout from saved preset */
+    const savedPreset = localStorage.getItem('ws_active_preset') || 'default';
+    const p = THEME_PRESETS[savedPreset];
+    if (p && p._layout) document.documentElement.setAttribute('data-layout', p._layout);
   } catch(e) {}
 }
 
@@ -5343,11 +5735,13 @@ async function init() {
   renderContinueWatching();
   await loadGenres();
   await loadHero();
+  // Randomize pages for fresh content each visit
+  const _rp = () => ({ page: Math.ceil(Math.random() * 4) });
   await Promise.all([
     loadRow('trendingRow', '/trending/all/week'),
-    loadRow('popularMoviesRow', '/movie/popular', {}, 'movie'),
-    loadRow('popularSeriesRow', '/tv/popular', {}, 'tv'),
-    loadRow('topRatedRow', '/movie/top_rated', {}, 'movie'),
+    loadRow('popularMoviesRow', '/movie/popular', _rp(), 'movie'),
+    loadRow('popularSeriesRow', '/tv/popular', _rp(), 'tv'),
+    loadRow('topRatedRow', '/movie/top_rated', _rp(), 'movie'),
   ]);
   // Load genre rows after main rows
   setTimeout(loadGenreRows, 500);
@@ -5369,18 +5763,44 @@ function scrollRow(rowId, dir) {
 // ========================================
 // GENRE ROWS — Netflix-style infinite horizontal scroll
 // ========================================
-const HOME_GENRE_ROWS = [
-  { id: 28,  name: '💥 Action',      type: 'movie' },
-  { id: 35,  name: '😂 Comedy',      type: 'movie' },
-  { id: 27,  name: '👻 Horror',      type: 'movie' },
-  { id: 10749, name: '💕 Romance',   type: 'movie' },
-  { id: 878,  name: '🚀 Sci-Fi',     type: 'movie' },
-  { id: 18,  name: '🎭 Drama',       type: 'tv'    },
-  { id: 16,  name: '🎨 Animation',   type: 'movie' },
-  { id: 53,  name: '🔪 Thriller',    type: 'movie' },
-  { id: 10759, name: '⚔️ Action & Adventure', type: 'tv' },
-  { id: 9648, name: '🔍 Mystery',    type: 'tv'    },
+// All available genre rows — randomized each visit for fresh homepage
+const ALL_GENRE_ROWS = [
+  { id: 28,    name: '💥 Action',              type: 'movie', priority: 1 },
+  { id: 35,    name: '😂 Comedy',              type: 'movie', priority: 1 },
+  { id: 27,    name: '👻 Horror',              type: 'movie', priority: 1 },
+  { id: 10749, name: '💕 Romance',             type: 'movie', priority: 1 },
+  { id: 878,   name: '🚀 Sci-Fi & Fantasy',    type: 'movie', priority: 1 },
+  { id: 18,    name: '🎭 Drama',               type: 'tv',    priority: 1 },
+  { id: 16,    name: '🎨 Animation',           type: 'movie', priority: 1 },
+  { id: 53,    name: '🔪 Thriller',            type: 'movie', priority: 1 },
+  { id: 10759, name: '⚔️ Action & Adventure',  type: 'tv',    priority: 1 },
+  { id: 9648,  name: '🔍 Mystery',             type: 'tv',    priority: 2 },
+  { id: 14,    name: '🌌 Fantasy',             type: 'movie', priority: 2 },
+  { id: 12,    name: '🗺️ Adventure',           type: 'movie', priority: 2 },
+  { id: 80,    name: '🕵️ Crime',               type: 'movie', priority: 2 },
+  { id: 10765, name: '🧙 Sci-Fi & Fantasy TV', type: 'tv',    priority: 2 },
+  { id: 10762, name: '👶 Kids',                type: 'tv',    priority: 3 },
+  { id: 10751, name: '👨‍👩‍👧 Family',              type: 'movie', priority: 3 },
+  { id: 36,    name: '📜 History',             type: 'movie', priority: 3 },
+  { id: 10752, name: '⚔️ War',                 type: 'movie', priority: 3 },
+  { id: 37,    name: '🤠 Western',             type: 'movie', priority: 3 },
+  { id: 10766, name: '💔 Soap',                type: 'tv',    priority: 3 },
+  { id: 10767, name: '🎙️ Talk',                type: 'tv',    priority: 3 },
+  { id: 10763, name: '📰 News',                type: 'tv',    priority: 3 },
 ];
+
+// Randomize: always show priority-1 rows, shuffle priority-2 and 3
+function buildGenreRows() {
+  const p1 = ALL_GENRE_ROWS.filter(r => r.priority === 1);
+  const p2 = ALL_GENRE_ROWS.filter(r => r.priority === 2).sort(() => Math.random() - 0.5).slice(0, 4);
+  const p3 = ALL_GENRE_ROWS.filter(r => r.priority === 3).sort(() => Math.random() - 0.5).slice(0, 2);
+  // Interleave p1 with p2/p3 for variety
+  const combined = [...p1];
+  p2.forEach((r, i) => combined.splice(Math.min(3 + i * 2, combined.length), 0, r));
+  p3.forEach(r => combined.push(r));
+  return combined;
+}
+const HOME_GENRE_ROWS = buildGenreRows();
 
 // State per genre row: { page, loading, hasMore, observer }
 const genreRowState = new Map();
@@ -5510,7 +5930,8 @@ async function loadGenreRows() {
     const rowId = 'genre-row-' + genre.id + '-' + genre.type;
 
     // Init state for this row
-    genreRowState.set(rowId, { page: 2, loading: false, hasMore: true, observer: null });
+    const _initPage = Math.ceil(Math.random() * 3);
+    genreRowState.set(rowId, { page: _initPage + 1, loading: false, hasMore: true, observer: null });
 
     section.innerHTML = `
       <div class="section-header" data-ws-ui>
@@ -5528,7 +5949,9 @@ async function loadGenreRows() {
     // Load page 1 first, then setup infinite scroll
     (async (gId, gType, rId) => {
       const endpoint = gType === 'tv' ? '/discover/tv' : '/discover/movie';
-      const params = { with_genres: gId, sort_by: 'popularity.desc', page: 1 };
+      // Randomize starting page (1-3) for fresh content each visit
+      const startPage = Math.ceil(Math.random() * 3);
+      const params = { with_genres: gId, sort_by: 'popularity.desc', page: startPage };
       const data = await tmdb(endpoint, params);
       const rowEl = document.getElementById(rId);
       if (!rowEl || !data || !data.results) return;
@@ -5669,7 +6092,7 @@ let swRegistration = null;
    - Offline fallback → custom offline page
    ============================================================ */
 
-const CACHE_NAME = 'wipestream-v37';
+const CACHE_NAME = 'wipestream-v47';
 const STATIC_CACHE = 'wipestream-static-v24';
 const API_CACHE = 'wipestream-api-v24';
 
