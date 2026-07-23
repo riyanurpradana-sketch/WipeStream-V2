@@ -1,6 +1,6 @@
 <!--
   ╔═══════════════════════════════════════════════════════════════╗
-  ║                    KYA WIPESTREAM v34                       ║
+  ║                    KYA WIPESTREAM v36                       ║
   ║                                                              ║
   ║  A premium streaming web application for movies & TV series  ║
   ║  Built as a self-contained single-file PWA                   ║
@@ -2473,7 +2473,7 @@ div[style*="z-index:2147483647"] { display:none!important; }
   <div class="detail-backdrop">
     <img id="detailBackdrop" src="" alt="" />
     <div class="detail-backdrop-overlay"></div>
-    <button class="detail-back" onclick="history.back()">&#8592;</button>
+    <button class="detail-back" onclick="navigateBack()">&#8592;</button>
   </div>
   <div class="detail-content">
     <div class="detail-header">
@@ -2513,7 +2513,7 @@ div[style*="z-index:2147483647"] { display:none!important; }
      ======================================== -->
 <div class="player-modal" id="playerModal">
   <div class="player-header">
-    <button class="player-back-btn" onclick="playerGoBack()" title="Back">&#8592;</button>
+    <button class="player-back-btn" onclick="navigateBack()" title="Back">&#8592;</button>
     <span class="player-title" id="playerTitle">WipeStream</span>
     <button class="player-close" onclick="closePlayer()" title="Close">✕</button>
   </div>
@@ -2689,7 +2689,7 @@ const I18N = {
     setOrigLang: 'Original Language', setOrigLangSub: 'Show films with a specific original language',
     setUATitle: '🌐 User Agent', setUAPreset: 'User Agent Preset', setUAPresetSub: 'Choose a preset or enter custom',
     setUACustom: 'Custom User Agent', setAbout: 'ℹ️ About',
-    setVersion: 'Version 34.0 — Premium Streaming', setVideoSrc: 'Video Source',
+    setVersion: 'Version 36.0 — Premium Streaming', setVideoSrc: 'Video Source',
     setDataSource: 'Movie Data', setAdblock: 'Ad Blocker', setAdblockSub: 'Built-in, always active',
     setSaveBtn: '💾 Save Settings', setGoWatchlist: '❤️ My Watchlist', setGoHistory: '🕐 Watch History',
     wlTitle: '❤️ Watchlist', wlClear: '🗑️ Clear All', histTitle: '🕐 Watch History', histClear: '🗑️ Clear All',
@@ -2846,7 +2846,7 @@ I18N['fr-FR'] = {
   setContentLang: 'Langue du contenu', setContentLangSub: 'Langue pour les titres et synopsis',
   setUATitle: '🌐 Agent Utilisateur', setUAPreset: 'Préréglage UA', setUAPresetSub: 'Choisir un préréglage ou saisir un personnalisé',
   setUACustom: 'UA Personnalisé', setAbout: 'ℹ️ À propos',
-  setVersion: 'Version 34.0', setVideoSrc: 'Source Vidéo', setDataSource: 'Données Films',
+  setVersion: 'Version 36.0', setVideoSrc: 'Source Vidéo', setDataSource: 'Données Films',
   setAdblock: 'Bloqueur de Pub', setAdblockSub: 'Intégré, toujours actif',
   setSaveBtn: '💾 Enregistrer', setGoWatchlist: '❤️ Ma Liste', setGoHistory: '🕐 Historique',
   wlTitle: '❤️ Ma Liste', wlClear: '🗑️ Tout Effacer', histTitle: '🕐 Historique', histClear: '🗑️ Tout Effacer',
@@ -2886,7 +2886,7 @@ I18N['de-DE'] = {
   setContentLang: 'Inhaltssprache', setContentLangSub: 'Sprache für Titel und Beschreibungen',
   setUATitle: '🌐 User Agent', setUAPreset: 'UA-Voreinstellung', setUAPresetSub: 'Voreinstellung wählen oder benutzerdefiniert eingeben',
   setUACustom: 'Benutzerdefinierter UA', setAbout: 'ℹ️ Über die App',
-  setVersion: 'Version 34.0', setVideoSrc: 'Videoquelle', setDataSource: 'Filmdaten',
+  setVersion: 'Version 36.0', setVideoSrc: 'Videoquelle', setDataSource: 'Filmdaten',
   setAdblock: 'Werbeblocker', setAdblockSub: 'Integriert, immer aktiv',
   setSaveBtn: '💾 Speichern', setGoWatchlist: '❤️ Meine Liste', setGoHistory: '🕐 Verlauf',
   wlTitle: '❤️ Meine Liste', wlClear: '🗑️ Alles löschen', histTitle: '🕐 Verlauf', histClear: '🗑️ Alles löschen',
@@ -3746,12 +3746,9 @@ async function openDetail(id, type) {
     // Don't reset overflow here — detail page will set it
   }
 
-  // Push to nav history stack (unless restoring from popstate)
-  if (!_navLock) {
-    _navPush({ type: 'detail', id: id, mediaType: type });
-    try {
-      history.pushState({ wsType: 'detail', wsId: id, wsMediaType: type }, '', '#detail-' + type + '-' + id);
-    } catch(e) {}
+  // NAV v36: push to appNavStack (only if not restoring from navigateBack)
+  if (!_navRestoring) {
+    _appNavPush({ type: 'detail', id: id, mediaType: type });
   }
 
   const detailEl = document.getElementById('detailPage');
@@ -4081,18 +4078,15 @@ function openPlayer() {
   if (_detailPage) _detailPage.dataset.hiddenByPlayer = '1', _detailPage.style.visibility = 'hidden';
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
-  // Push player state to browser history so back button works
-  try {
-    const _playerState = {
-      wsType: 'player',
-      wsId: currentDetail ? currentDetail.id : null,
-      wsMediaType: currentDetail ? currentDetail.media_type : null,
-      wsSeason: currentSeason,
-      wsEpisode: currentEpisode
-    };
-    history.pushState(_playerState, '', location.href.split('#')[0] + '#player');
-    console.log('[WipeStream v34] openPlayer pushState:', _playerState);
-  } catch(e) { console.warn('[WipeStream v34] openPlayer pushState failed:', e); }
+  // NAV v36: push player to appNavStack
+  if (!_navRestoring) {
+    _appNavPush({ type: 'player',
+      id: currentDetail ? currentDetail.id : null,
+      mediaType: currentDetail ? currentDetail.media_type : null,
+      season: currentSeason, episode: currentEpisode });
+  }
+  // Push 1 dummy browser state so Android back triggers popstate (not exit)
+  try { history.pushState({ wsApp: true }, '', location.href.split('#')[0] + '#player'); } catch(e) {}
   // Mark detail page so closeCastModal knows to return there
   const _detailBeforeCast = document.getElementById('detailPage');
   if (_detailBeforeCast && _detailBeforeCast.classList.contains('active')) {
@@ -4188,33 +4182,13 @@ function closePlayer() {
     _detailPage.style.visibility = '';
     delete _detailPage.dataset.hiddenByPlayer;
   }
-  console.log('[WipeStream v34] closePlayer: player closed, detail restored');
+  console.log('[WipeStream v36] closePlayer: player closed, detail restored');
 }
 
 // Player back button — close player and return to detail page
 function playerGoBack() {
-  const modal = document.getElementById('playerModal');
-  if (modal && modal.classList.contains('active')) {
-    closePlayer();
-    // If detail page is active, stay there (it was restored by closePlayer)
-    // If not, go back via history
-    const detailEl = document.getElementById('detailPage');
-    if (!detailEl || !detailEl.classList.contains('active')) {
-      // No detail page open — go back in history
-      try { history.back(); } catch(e) { showPage('home'); }
-    }
-    // Remove the #player hash from URL without triggering popstate
-    try {
-      if (location.hash === '#player') {
-        history.replaceState(
-          { wsType: 'detail', wsId: currentDetail ? currentDetail.id : null, wsMediaType: currentDetail ? currentDetail.media_type : null },
-          '',
-          location.href.replace('#player', '')
-        );
-      }
-    } catch(e) {}
-    console.log('[WipeStream v34] playerGoBack: returned to detail');
-  }
+  // NAV v36: delegate to unified navigateBack()
+  navigateBack();
 }
 
 function openTrailer() {
@@ -4263,18 +4237,15 @@ async function openCastModal(personId, name, profilePath) {
   const avatarImg = document.getElementById('castModalAvatarImg');
   const bodyEl = document.getElementById('castModalBody');
 
-  // Push to nav history stack (unless restoring from popstate)
-  if (!_navLock) {
-    // Capture current detail context for restoration
+  // NAV v36: push cast to appNavStack
+  if (!_navRestoring) {
     const _curDetailId = (currentDetail && currentDetail.id) ? currentDetail.id : null;
     const _curDetailType = (currentDetail && currentDetail.media_type) ? currentDetail.media_type : null;
-    _navPush({ type: 'cast', personId: personId, personName: name, personProfile: profilePath,
-               detailId: _curDetailId, detailType: _curDetailType });
-    try {
-      history.pushState({ wsType: 'cast', wsPersonId: personId, wsPersonName: name, wsPersonProfile: profilePath,
-                          wsDetailId: _curDetailId, wsDetailType: _curDetailType }, '', '#cast-' + personId);
-    } catch(e) {}
+    _appNavPush({ type: 'cast', personId: personId, personName: name, personProfile: profilePath,
+                  detailId: _curDetailId, detailType: _curDetailType });
   }
+  // Push 1 dummy browser state so Android back triggers popstate
+  try { history.pushState({ wsApp: true }, '', location.href.split('#')[0] + '#cast-' + personId); } catch(e) {}
 
   nameEl.textContent = name;
   bioEl.textContent = '';
@@ -4353,10 +4324,11 @@ function castCreditCard(item, type) {
 }
 
 function castModalOpenDetail(id, type) {
-  // Close cast modal (pop cast entry from navHistory)
-  const _castEntry = _navPop(); // pop cast entry
+  // NAV v36: pop cast from appNavStack, then open new detail
+  const _castTop = _appNavStack[_appNavStack.length - 1];
+  if (_castTop && _castTop.type === 'cast') _appNavStack.pop();
   closeCastModal();
-  // openDetail will push its own entry to navHistory
+  // openDetail will push its own entry to appNavStack
   setTimeout(() => openDetail(id, type), 300);
 }
 
@@ -4571,16 +4543,15 @@ function showPage(page) {
     _srchOvNav.classList.remove('active');
     document.body.style.overflow = '';
   }
-  // Push state for Android back button support
-  try {
+  // NAV v36: push page to appNavStack (only if not restoring)
+  if (!_navRestoring) {
+    _appNavPush({ type: 'page', page: page });
+    // Push 1 dummy browser state so Android back triggers popstate (not exit)
+    // Only push if not home (home is the base — no need to push)
     if (page !== 'home') {
-      history.pushState({ wsPage: page, wsType: 'page' }, '', '#' + page);
-    } else {
-      history.pushState({ wsPage: 'home', wsType: 'page' }, '', location.pathname);
+      try { history.pushState({ wsApp: true }, '', '#' + page); } catch(e) {}
     }
-  } catch(e) {}
-  // Push to internal nav history stack
-  _navPush({ type: 'page', page: page });
+  }
   const detailEl = document.getElementById('detailPage');
   detailEl.classList.remove('active');
   detailEl.style.display = 'none';
@@ -4597,7 +4568,7 @@ function showPage(page) {
   if (topNavEl) topNavEl.classList.add('active');
 
   currentPage = page;
-  if (page === 'home') _navHistory = []; // Clear history at home
+  if (page === 'home') _appNavStack = [{ type: 'page', page: 'home' }]; // Reset stack at home
   window.scrollTo(0, 0);
   document.body.style.overflow = '';
   playSoundNav(); // Sound FX on navigation
@@ -5070,160 +5041,138 @@ function clearAllCache() {
 }
 
 // ========================================
-// BACK BUTTON — Android hardware/gesture back (navHistory-aware)
-// ========================================
+// ============================================================
+// NAV v36 — Simple appNavStack navigation system
+// ============================================================
+// appNavStack: array of state objects, index 0 = home (base)
+// Each state: { type: 'page'|'detail'|'player'|'cast', ... }
+// _navRestoring: true while navigateBack() is restoring a state
+//   → prevents openDetail/openPlayer/openCastModal/showPage from pushing again
+// ============================================================
+
+let _appNavStack = [{ type: 'page', page: 'home' }];
+let _navRestoring = false;
+
+function _appNavPush(entry) {
+  // Deduplicate: don't push if top of stack is identical
+  const top = _appNavStack[_appNavStack.length - 1];
+  if (top && top.type === entry.type) {
+    if (entry.type === 'page' && top.page === entry.page) return;
+    if (entry.type === 'detail' && top.id === entry.id && top.mediaType === entry.mediaType) return;
+    if (entry.type === 'player' && top.id === entry.id) return;
+    if (entry.type === 'cast' && top.personId === entry.personId) return;
+  }
+  _appNavStack.push(entry);
+  if (_appNavStack.length > 60) _appNavStack.shift();
+  console.log('[NAV v36] push', entry.type, '| stack:', _appNavStack.length);
+}
+
+// Main back function — called by ALL back buttons and Android back
+async function navigateBack() {
+  if (_navRestoring) return; // prevent re-entrant calls
+  _navRestoring = true;
+  try {
+    const castModal = document.getElementById('castModal');
+    const playerModal = document.getElementById('playerModal');
+    const searchOverlay = document.getElementById('searchOverlay');
+    const detailEl = document.getElementById('detailPage');
+
+    // Priority 1: Close player if open
+    if (playerModal && playerModal.classList.contains('active')) {
+      closePlayer();
+      // Pop player entry from stack
+      const top = _appNavStack[_appNavStack.length - 1];
+      if (top && top.type === 'player') _appNavStack.pop();
+      console.log('[NAV v36] back: closed player, stack:', _appNavStack.length);
+      return;
+    }
+
+    // Priority 2: Close cast modal if open
+    if (castModal && castModal.classList.contains('active')) {
+      closeCastModal();
+      const top = _appNavStack[_appNavStack.length - 1];
+      if (top && top.type === 'cast') _appNavStack.pop();
+      console.log('[NAV v36] back: closed cast, stack:', _appNavStack.length);
+      return;
+    }
+
+    // Priority 3: Close search overlay if open
+    if (searchOverlay && searchOverlay.classList.contains('active')) {
+      toggleSearch();
+      console.log('[NAV v36] back: closed search');
+      return;
+    }
+
+    // Priority 4: Close detail page if open
+    if (detailEl && detailEl.classList.contains('active')) {
+      closeDetail();
+      const top = _appNavStack[_appNavStack.length - 1];
+      if (top && top.type === 'detail') _appNavStack.pop();
+      // Peek at what's below
+      const prev = _appNavStack[_appNavStack.length - 1];
+      if (prev && prev.type === 'detail') {
+        // Previous was also a detail (e.g. from cast → detail chain)
+        await openDetail(prev.id, prev.mediaType);
+      } else if (prev && prev.type === 'page') {
+        showPage(prev.page);
+      } else {
+        showPage('home');
+      }
+      console.log('[NAV v36] back: closed detail, stack:', _appNavStack.length);
+      return;
+    }
+
+    // Priority 5: Page navigation
+    const top = _appNavStack[_appNavStack.length - 1];
+    if (top && top.type === 'page' && top.page !== 'home') {
+      _appNavStack.pop();
+      const prev = _appNavStack[_appNavStack.length - 1];
+      if (prev && prev.type === 'page') {
+        showPage(prev.page);
+      } else {
+        showPage('home');
+      }
+      console.log('[NAV v36] back: page nav, stack:', _appNavStack.length);
+      return;
+    }
+
+    // Already at home — show exit confirmation on Android
+    console.log('[NAV v36] at home, letting browser handle back');
+    // Re-push so next Android back exits properly
+    try { history.go(-1); } catch(e) {}
+
+  } finally {
+    _navRestoring = false;
+  }
+}
+
+// Android hardware/gesture back — popstate handler
+// Strategy: ALWAYS re-push a dummy state after handling, so Android never exits unexpectedly
 window.addEventListener('popstate', async function(e) {
-  const state = e.state;
+  // Re-push immediately so Android back doesn't exit the app
+  // (we manage navigation ourselves via appNavStack)
   const castModal = document.getElementById('castModal');
   const playerModal = document.getElementById('playerModal');
-  const searchOverlay = document.getElementById('searchOverlay');
   const detailEl = document.getElementById('detailPage');
+  const searchOverlay = document.getElementById('searchOverlay');
 
-  // Priority 1: Close player if open (handles both hardware back and #player state)
-  if (playerModal && playerModal.classList.contains('active')) {
-    closePlayer();
-    // After closing player, restore detail state in history so next back goes to detail's previous page
-    const _detailEl = document.getElementById('detailPage');
-    if (_detailEl && _detailEl.classList.contains('active') && currentDetail) {
-      try {
-        history.replaceState(
-          { wsType: 'detail', wsId: currentDetail.id, wsMediaType: currentDetail.media_type },
-          '',
-          location.href.replace('#player', '')
-        );
-      } catch(e) {}
-    } else {
-      try { history.pushState(state || { wsType: 'detail' }, ''); } catch(e) {}
-    }
-    console.log('[WipeStream v34] popstate Priority 1: player closed');
-    return;
-  }
-  // Also handle wsType:'player' state (from openPlayer pushState) even if modal not active
-  if (state && state.wsType === 'player') {
-    // Player state but modal not active — just go back further
-    console.log('[WipeStream v34] popstate: stale player state, continuing back');
-    // Fall through to other priorities
-  }
+  const hasOverlay = (playerModal && playerModal.classList.contains('active')) ||
+                     (castModal && castModal.classList.contains('active')) ||
+                     (searchOverlay && searchOverlay.classList.contains('active')) ||
+                     (detailEl && detailEl.classList.contains('active'));
 
-  // Priority 2: Close cast modal if open
-  if (castModal && castModal.classList.contains('active')) {
-    // Pop the cast entry from navHistory
-    const _castEntry = _navPop();
-    closeCastModal();
-    // If there was a detail open before cast, restore it
-    if (_castEntry && _castEntry.detailId) {
-      // Detail is still open (closeCastModal doesn't close detail)
-      // Just re-push a state for the detail so next back works
-      try { history.pushState({ wsType: 'detail', wsId: _castEntry.detailId, wsMediaType: _castEntry.detailType }, ''); } catch(e) {}
-    } else {
-      try { history.pushState(state || { wsType: 'page', wsPage: currentPage }, ''); } catch(e) {}
-    }
-    return;
-  }
+  const atHome = _appNavStack.length <= 1 ||
+    (_appNavStack.length === 1 && _appNavStack[0].type === 'page' && _appNavStack[0].page === 'home');
 
-  // Priority 3: Close search overlay if open
-  if (searchOverlay && searchOverlay.classList.contains('active')) {
-    toggleSearch();
-    try { history.pushState(state || { wsType: 'page', wsPage: currentPage }, ''); } catch(e) {}
-    return;
+  if (hasOverlay || !atHome) {
+    // Re-push dummy state so next Android back triggers popstate again
+    try { history.pushState({ wsApp: true }, '', location.pathname); } catch(e2) {}
+    await navigateBack();
+  } else {
+    // At home with no overlays — let browser exit (don't re-push)
+    console.log('[NAV v36] popstate at home, allowing browser exit');
   }
-
-  // Priority 4: Close detail page if open — navigate to previous entry
-  if (detailEl && detailEl.classList.contains('active')) {
-    // Pop the detail entry from navHistory
-    const _detailEntry = _navPop();
-    closeDetail();
-    // Peek at what's below — if it's another detail or cast, restore it
-    const _prevEntry = _navPeek();
-    if (_prevEntry && _prevEntry.type === 'detail') {
-      // Navigate to previous detail
-      await _navRestoreEntry(_prevEntry);
-      try { history.pushState({ wsType: 'detail', wsId: _prevEntry.id, wsMediaType: _prevEntry.mediaType }, ''); } catch(e) {}
-    } else if (_prevEntry && _prevEntry.type === 'page') {
-      showPage(_prevEntry.page);
-    } else {
-      // No history — go to current page or home
-      showPage(currentPage || 'home');
-    }
-    return;
-  }
-
-  // Priority 5: Page navigation via navHistory
-  const _pageEntry = _navPop();
-  if (_pageEntry && _pageEntry.type === 'page' && _pageEntry.page !== 'home') {
-    showPage(_pageEntry.page);
-    return;
-  }
-
-  // Priority 6: Use browser state as fallback
-  if (state && state.wsType === 'detail' && state.wsId) {
-    await openDetail(state.wsId, state.wsMediaType || 'movie');
-    return;
-  }
-  if (state && state.wsType === 'cast' && state.wsPersonId) {
-    if (state.wsDetailId) await openDetail(state.wsDetailId, state.wsDetailType || 'movie');
-    await openCastModal(state.wsPersonId, state.wsPersonName || '', state.wsPersonProfile || '');
-    return;
-  }
-  if (state && state.wsPage && state.wsPage !== 'home') {
-    showPage(state.wsPage);
-    return;
-  }
-
-  // Already at home — let browser handle (exit app on Android)
-  console.log('[NavHistory] At root, letting browser handle back');
 });
-
-// Push initial state
-try { history.replaceState({ wsPage: 'home', wsType: 'page' }, '', location.pathname); } catch(e) {}
-
-// ========================================
-// INITIALIZATION — App startup
-// ========================================
-let currentPage = 'home';
-
-// ========================================
-// NAV HISTORY STACK — Proper back navigation
-// ========================================
-// Each entry: { type: 'page'|'detail'|'cast', page, id, mediaType, personId, personName, personProfile }
-let _navHistory = [];
-let _navLock = false; // prevent double-push during popstate restore
-
-function _navPush(entry) {
-  if (_navLock) return;
-  _navHistory.push(entry);
-  // Keep max 50 entries
-  if (_navHistory.length > 50) _navHistory.shift();
-  console.log('[NavHistory] push', entry.type, '| stack depth:', _navHistory.length);
-}
-
-function _navPop() {
-  return _navHistory.pop() || null;
-}
-
-function _navPeek() {
-  return _navHistory.length > 0 ? _navHistory[_navHistory.length - 1] : null;
-}
-
-async function _navRestoreEntry(entry) {
-  if (!entry) { showPage('home'); return; }
-  _navLock = true;
-  try {
-    if (entry.type === 'page') {
-      showPage(entry.page);
-    } else if (entry.type === 'detail') {
-      await openDetail(entry.id, entry.mediaType);
-    } else if (entry.type === 'cast') {
-      // Restore detail first if it was open
-      if (entry.detailId) {
-        await openDetail(entry.detailId, entry.detailType);
-      }
-      await openCastModal(entry.personId, entry.personName, entry.personProfile);
-    }
-  } finally {
-    _navLock = false;
-  }
-}
 
 function toggleAutoUA() {
   const toggle = document.getElementById('autoUAToggle');
@@ -5683,7 +5632,7 @@ let swRegistration = null;
    - Offline fallback → custom offline page
    ============================================================ */
 
-const CACHE_NAME = 'wipestream-v34';
+const CACHE_NAME = 'wipestream-v36';
 const STATIC_CACHE = 'wipestream-static-v24';
 const API_CACHE = 'wipestream-api-v24';
 
