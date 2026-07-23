@@ -1,6 +1,6 @@
 <!--
   ╔═══════════════════════════════════════════════════════════════╗
-  ║                    KYA WIPESTREAM v36                       ║
+  ║                    KYA WIPESTREAM v37                       ║
   ║                                                              ║
   ║  A premium streaming web application for movies & TV series  ║
   ║  Built as a self-contained single-file PWA                   ║
@@ -2689,7 +2689,7 @@ const I18N = {
     setOrigLang: 'Original Language', setOrigLangSub: 'Show films with a specific original language',
     setUATitle: '🌐 User Agent', setUAPreset: 'User Agent Preset', setUAPresetSub: 'Choose a preset or enter custom',
     setUACustom: 'Custom User Agent', setAbout: 'ℹ️ About',
-    setVersion: 'Version 36.0 — Premium Streaming', setVideoSrc: 'Video Source',
+    setVersion: 'Version 37.0 — Premium Streaming', setVideoSrc: 'Video Source',
     setDataSource: 'Movie Data', setAdblock: 'Ad Blocker', setAdblockSub: 'Built-in, always active',
     setSaveBtn: '💾 Save Settings', setGoWatchlist: '❤️ My Watchlist', setGoHistory: '🕐 Watch History',
     wlTitle: '❤️ Watchlist', wlClear: '🗑️ Clear All', histTitle: '🕐 Watch History', histClear: '🗑️ Clear All',
@@ -2846,7 +2846,7 @@ I18N['fr-FR'] = {
   setContentLang: 'Langue du contenu', setContentLangSub: 'Langue pour les titres et synopsis',
   setUATitle: '🌐 Agent Utilisateur', setUAPreset: 'Préréglage UA', setUAPresetSub: 'Choisir un préréglage ou saisir un personnalisé',
   setUACustom: 'UA Personnalisé', setAbout: 'ℹ️ À propos',
-  setVersion: 'Version 36.0', setVideoSrc: 'Source Vidéo', setDataSource: 'Données Films',
+  setVersion: 'Version 37.0', setVideoSrc: 'Source Vidéo', setDataSource: 'Données Films',
   setAdblock: 'Bloqueur de Pub', setAdblockSub: 'Intégré, toujours actif',
   setSaveBtn: '💾 Enregistrer', setGoWatchlist: '❤️ Ma Liste', setGoHistory: '🕐 Historique',
   wlTitle: '❤️ Ma Liste', wlClear: '🗑️ Tout Effacer', histTitle: '🕐 Historique', histClear: '🗑️ Tout Effacer',
@@ -2886,7 +2886,7 @@ I18N['de-DE'] = {
   setContentLang: 'Inhaltssprache', setContentLangSub: 'Sprache für Titel und Beschreibungen',
   setUATitle: '🌐 User Agent', setUAPreset: 'UA-Voreinstellung', setUAPresetSub: 'Voreinstellung wählen oder benutzerdefiniert eingeben',
   setUACustom: 'Benutzerdefinierter UA', setAbout: 'ℹ️ Über die App',
-  setVersion: 'Version 36.0', setVideoSrc: 'Videoquelle', setDataSource: 'Filmdaten',
+  setVersion: 'Version 37.0', setVideoSrc: 'Videoquelle', setDataSource: 'Filmdaten',
   setAdblock: 'Werbeblocker', setAdblockSub: 'Integriert, immer aktiv',
   setSaveBtn: '💾 Speichern', setGoWatchlist: '❤️ Meine Liste', setGoHistory: '🕐 Verlauf',
   wlTitle: '❤️ Meine Liste', wlClear: '🗑️ Alles löschen', histTitle: '🕐 Verlauf', histClear: '🗑️ Alles löschen',
@@ -4182,7 +4182,7 @@ function closePlayer() {
     _detailPage.style.visibility = '';
     delete _detailPage.dataset.hiddenByPlayer;
   }
-  console.log('[WipeStream v36] closePlayer: player closed, detail restored');
+  console.log('[WipeStream v37] closePlayer: player closed, detail restored');
 }
 
 // Player back button — close player and return to detail page
@@ -4493,7 +4493,7 @@ async function doSearch() {
   const year = document.getElementById('searchYear').value;
   const type = document.getElementById('searchType').value;
   const resultsEl = document.getElementById('searchResults');
-  console.log('[WipeStream v31] doSearch:', {query, genre, year, type, resultsEl: !!resultsEl});
+  console.log('[WipeStream v37] doSearch:', {query, genre, year, type, resultsEl: !!resultsEl});
 
   if (!query && !genre) { resultsEl.innerHTML = ''; return; }
   // Ensure search overlay is open
@@ -4786,7 +4786,7 @@ const SOUND_PRESETS = {
   }
 };
 
-let soundFxEnabled = false;
+let soundFxEnabled = true;
 let activeSoundPreset = 'click';
 
 function toggleSoundFx() {
@@ -4823,7 +4823,9 @@ function playSound(preset) {
 function playSoundNav() { playSound(activeSoundPreset); }
 
 function loadSoundFxSettings() {
-  soundFxEnabled = localStorage.getItem('ws_soundfx_enabled') === '1';
+  // Default ON: jika belum pernah set (null), anggap enabled
+  const stored = localStorage.getItem('ws_soundfx_enabled');
+  soundFxEnabled = stored === null ? true : stored === '1';
   activeSoundPreset = localStorage.getItem('ws_soundfx_preset') || 'click';
   const toggle = document.getElementById('soundFxToggle');
   if (toggle) toggle.checked = soundFxEnabled;
@@ -4831,6 +4833,41 @@ function loadSoundFxSettings() {
     i.classList.toggle('active', i.dataset.preset === activeSoundPreset);
   });
 }
+
+// ========================================
+// SOUND FX — Auto-resume + Delegated click listener
+// ========================================
+
+// Resume AudioContext on first user gesture (browser autoplay policy)
+let _audioResumed = false;
+function _ensureAudioResumed() {
+  if (_audioResumed) return;
+  const ctx = getAudioCtx();
+  if (ctx && ctx.state === 'suspended') {
+    ctx.resume().then(() => { _audioResumed = true; });
+  } else if (ctx && ctx.state === 'running') {
+    _audioResumed = true;
+  }
+}
+
+// Delegated click listener — play sound on ANY interactive element click
+document.addEventListener('click', function(e) {
+  _ensureAudioResumed();
+  if (!soundFxEnabled) return;
+  // Skip jika di dalam player iframe area
+  if (e.target.closest('#playerFrame, #playerOverlay iframe, .player-iframe-wrap')) return;
+  // Skip typing di search input
+  if (e.target.tagName === 'INPUT' && e.target.type === 'text') return;
+  // Trigger pada elemen interaktif
+  if (e.target.closest('button, a, .card, .movie-card, .series-card, .nav-item, .bottom-nav-item, .genre-chip, .episode-item, [onclick], .clickable, select, .settings-row, .sound-preset-item, .theme-preset-item, .font-option, .cast-card, .search-result-item, .search-history-item, .season-select-wrap, .back-btn, .player-back-btn, .detail-back, .top-nav-item, .tab-btn, .filter-chip, .watchlist-btn, .trailer-btn, .play-btn, .pwa-install-btn, .toast-action')) {
+    playSound(activeSoundPreset);
+  }
+}, true); // capture phase agar tidak terblokir stopPropagation
+
+// Also resume on touchstart (mobile first gesture)
+document.addEventListener('touchstart', function() {
+  _ensureAudioResumed();
+}, { once: true, passive: true });
 
 // ========================================
 // FONT SELECTOR — Google Fonts dynamic load
@@ -5632,7 +5669,7 @@ let swRegistration = null;
    - Offline fallback → custom offline page
    ============================================================ */
 
-const CACHE_NAME = 'wipestream-v36';
+const CACHE_NAME = 'wipestream-v37';
 const STATIC_CACHE = 'wipestream-static-v24';
 const API_CACHE = 'wipestream-api-v24';
 
