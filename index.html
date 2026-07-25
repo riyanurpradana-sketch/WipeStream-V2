@@ -641,8 +641,19 @@ img{display:block}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
         Official Trailer
       </div>
-      <div class="trailer-frame">
-        <iframe id="trailerFrame" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+      <div class="trailer-frame" id="trailerFrameWrap">
+        <iframe id="trailerFrame" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <div id="trailerFallback" style="display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0a0a0f;">
+          <img id="trailerThumb" src="" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.35;">
+          <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;text-align:center;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#e53935" stroke-width="1.5" style="width:44px;height:44px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p style="color:rgba(255,255,255,0.7);font-size:0.875rem;margin:0">Trailer embed restricted by YouTube</p>
+            <a id="trailerYTLink" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;background:#e53935;color:#fff;border-radius:8px;font-weight:600;font-size:0.875rem;text-decoration:none;transition:opacity 0.2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+              <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-.9C16.2 5 12 5 12 5s-4.2 0-7 .1c-.4.1-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2s.2 1.4.8 2c.8.8 1.8.8 2.3.8C6.8 19 12 19 12 19s4.2 0 7-.1c.4-.1 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.5C22 9.6 21.8 8 21.8 8z"/><polygon points="10 15 15 12 10 9 10 15" fill="#fff"/></svg>
+              Watch on YouTube
+            </a>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -804,6 +815,7 @@ async function init() {
   populateYearFilter();
   loadHero();
   loadGenreRows();
+  initHeroDrag();
 }
 
 async function loadGenres() {
@@ -871,6 +883,68 @@ function startHeroTimer() {
   heroTimer = setInterval(() => setHero((heroIdx + 1) % heroFilms.length), 6000);
 }
 
+// ===== HERO DRAG-TO-SWIPE (desktop mouse) =====
+function initHeroDrag() {
+  const hero = document.getElementById('heroSection');
+  if (!hero) return;
+  let startX = 0, isDragging = false, dragMoved = false;
+  const DRAG_THRESHOLD = 50;
+
+  hero.style.cursor = 'grab';
+
+  hero.addEventListener('mousedown', (e) => {
+    // Don't drag if clicking buttons/links
+    if (e.target.closest('button, a, .hero-dot')) return;
+    isDragging = true;
+    dragMoved = false;
+    startX = e.clientX;
+    hero.style.cursor = 'grabbing';
+    clearInterval(heroTimer); // pause auto-slide while dragging
+    e.preventDefault();
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    if (Math.abs(e.clientX - startX) > 5) dragMoved = true;
+  });
+
+  window.addEventListener('mouseup', (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+    hero.style.cursor = 'grab';
+    if (dragMoved && heroFilms.length > 1) {
+      const diff = e.clientX - startX;
+      if (Math.abs(diff) >= DRAG_THRESHOLD) {
+        if (diff < 0) {
+          setHero((heroIdx + 1) % heroFilms.length); // swipe left → next
+        } else {
+          setHero((heroIdx - 1 + heroFilms.length) % heroFilms.length); // swipe right → prev
+        }
+      }
+    }
+    startHeroTimer(); // resume auto-slide
+  });
+
+  // Touch swipe (mobile)
+  let touchStartX = 0;
+  hero.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    clearInterval(heroTimer);
+  }, { passive: true });
+  hero.addEventListener('touchend', (e) => {
+    const diff = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(diff) >= DRAG_THRESHOLD && heroFilms.length > 1) {
+      if (diff < 0) setHero((heroIdx + 1) % heroFilms.length);
+      else setHero((heroIdx - 1 + heroFilms.length) % heroFilms.length);
+    }
+    startHeroTimer();
+  }, { passive: true });
+
+  // Pause on hover, resume on leave
+  hero.addEventListener('mouseenter', () => clearInterval(heroTimer));
+  hero.addEventListener('mouseleave', () => { if (!isDragging) startHeroTimer(); });
+}
+
 // ===== GENRE ROWS =====
 const GENRES_HOME = [
   { id: 28, name: 'Action' }, { id: 35, name: 'Comedy' }, { id: 27, name: 'Horror' },
@@ -912,6 +986,7 @@ async function loadGenreRow(genreId) {
   row.innerHTML = d.results.slice(0, 20).map(f => filmCardHTML(f, 'movie')).join('');
   updateArrows(`row-${genreId}`);
   row.addEventListener('scroll', () => updateArrows(`row-${genreId}`));
+  initRowDrag(row);
 }
 
 function scrollRow(rowId, dir) {
@@ -930,6 +1005,59 @@ function updateArrows(rowId) {
   if (rightBtn) rightBtn.classList.toggle('hidden', row.scrollLeft + row.clientWidth >= row.scrollWidth - 10);
 }
 
+// ===== ROW DRAG-TO-SCROLL (desktop mouse) =====
+function initRowDrag(row) {
+  let isDown = false, startX = 0, scrollLeft = 0, moved = false;
+  const DRAG_THRESHOLD = 5;
+
+  row.style.cursor = 'grab';
+
+  row.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    isDown = true;
+    moved = false;
+    startX = e.pageX - row.offsetLeft;
+    scrollLeft = row.scrollLeft;
+    row.style.cursor = 'grabbing';
+    row.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isDown) return;
+    isDown = false;
+    row.style.cursor = 'grab';
+    row.style.userSelect = '';
+    // After drag ends, briefly mark row as "just-dragged" to suppress click
+    if (moved) {
+      row.dataset.dragged = '1';
+      setTimeout(() => { delete row.dataset.dragged; }, 200);
+    }
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    const x = e.pageX - row.offsetLeft;
+    const walk = x - startX;
+    if (Math.abs(walk) > DRAG_THRESHOLD) moved = true;
+    if (moved) {
+      row.scrollLeft = scrollLeft - walk;
+      e.preventDefault();
+    }
+  });
+
+  // Suppress click on cards when drag happened
+  row.addEventListener('click', (e) => {
+    if (row.dataset.dragged) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  }, true);
+
+  // Touch scroll already works natively — just ensure cursor resets
+  row.addEventListener('touchstart', () => { moved = false; }, { passive: true });
+}
+
 // ===== FILM CARD =====
 const PLACEHOLDER_SVG = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='342' height='513' viewBox='0 0 342 513'%3E%3Crect fill='%231a1a24' width='342' height='513'/%3E%3Crect fill='%2322222e' x='121' y='186' width='100' height='80' rx='8'/%3E%3Cpolygon fill='%235a5a72' points='121,266 171,206 221,266'/%3E%3Ccircle fill='%235a5a72' cx='200' cy='210' r='14'/%3E%3Crect fill='%2333334a' x='91' y='290' width='160' height='10' rx='5'/%3E%3Crect fill='%2333334a' x='111' y='310' width='120' height='8' rx='4'/%3E%3C/svg%3E`;
 function imgFallback(el) { el.onerror = null; el.src = PLACEHOLDER_SVG; }
@@ -937,23 +1065,27 @@ function imgFallback(el) { el.onerror = null; el.src = PLACEHOLDER_SVG; }
 function filmCardHTML(f, type) {
   const id = f.id;
   const title = f.title || f.name || '';
-  // Support both TMDB API objects and watchlist-stored objects
+  // Support both TMDB API objects (poster_path = '/xxx.jpg') and watchlist objects (poster = full URL)
   const year = (f.release_date || f.first_air_date || '').slice(0, 4);
   const rawRating = f.vote_average;
-  const rating = (rawRating !== undefined && rawRating !== null && rawRating !== 0)
+  const rating = (rawRating !== undefined && rawRating !== null && rawRating > 0)
     ? Number(rawRating).toFixed(1)
     : null;
-  // Poster: always resolve to full URL
+  // Poster resolution — handle ALL cases:
+  // 1. watchlist object: f.poster is full URL (https://...)
+  // 2. TMDB API object: f.poster_path is relative (/xxx.jpg)
+  // 3. Either is null/undefined/empty → placeholder
   let poster;
-  if (!f.poster_path) {
+  const rawPoster = f.poster || f.poster_path || null;
+  if (!rawPoster) {
     poster = PLACEHOLDER_SVG;
-  } else if (f.poster_path.startsWith('http')) {
-    poster = f.poster_path; // already full URL (from watchlist localStorage)
+  } else if (rawPoster.startsWith('http')) {
+    poster = rawPoster; // already full URL — use as-is, NO prefix added
   } else {
-    poster = `${IMG}w342${f.poster_path}`;
+    poster = `${IMG}w342${rawPoster}`; // relative path from TMDB API
   }
-  // Full URL to store in watchlist (always absolute)
-  const posterFull = poster; // poster is already resolved above
+  // Full URL to store in watchlist — NEVER store placeholder SVG data URI (too long, corrupts HTML attr)
+  const posterFull = (poster && poster.indexOf('data:') !== 0) ? poster : '';
   const inWl = watchlist.some(w => w.id === id && w.type === type);
   const safeTitle = JSON.stringify(title).replace(/"/g,'&quot;');
   const safePosterFull = JSON.stringify(posterFull).replace(/"/g,'&quot;');
@@ -1000,7 +1132,7 @@ function toggleWatchlist(id, type, title, poster, btn, vote_average, release_dat
 
 function toggleWatchlistDetail() {
   if (!currentDetail) return;
-  const { id, type, title, poster } = currentDetail;
+  const { id, type, title } = currentDetail;
   const idx = watchlist.findIndex(w => w.id === id && w.type === type);
   const btn = document.getElementById('detailWlBtn');
   if (idx >= 0) {
@@ -1009,13 +1141,18 @@ function toggleWatchlistDetail() {
     btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Add to Watchlist`;
     showToast('Removed from Watchlist', 'error');
   } else {
-    // Save full metadata so badges work in watchlist
-    const d = currentDetail;
+    // poster in currentDetail is already a full URL (set in openDetail)
+    // poster_path from TMDB is relative, so we build full URL here as fallback
+    const posterFull = currentDetail.poster ||
+      (currentDetail.poster_path ? `${IMG}w500${currentDetail.poster_path}` : '');
     watchlist.push({
-      id, type, title, poster,
-      vote_average: d?.vote_average || 0,
-      release_date: d?.release_date || '',
-      first_air_date: d?.first_air_date || ''
+      id,
+      type,
+      title,
+      poster: posterFull,           // full URL — filmCardHTML reads f.poster
+      vote_average: currentDetail.vote_average || 0,
+      release_date: currentDetail.release_date || '',
+      first_air_date: currentDetail.first_air_date || ''
     });
     btn.classList.add('saved');
     btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> In Watchlist`;
@@ -1079,7 +1216,8 @@ async function openDetail(id, type, autoPlay) {
   const poster = detail.poster_path ? `${IMG}w500${detail.poster_path}` : '';
   const backdrop = detail.backdrop_path ? `${IMG}original${detail.backdrop_path}` : '';
 
-  currentDetail = { id, type, title, poster };
+  // Store FULL detail object so toggleWatchlistDetail() can access vote_average, release_date, etc.
+  currentDetail = { ...detail, id, type, title, poster };
 
   document.getElementById('detailBackdrop').src = backdrop;
   document.getElementById('detailPoster').src = poster;
@@ -1105,10 +1243,42 @@ async function openDetail(id, type, autoPlay) {
     : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Add to Watchlist`;
 
   // Trailer
-  const trailer = (videos.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube') || (videos.results || [])[0];
+  const trailer = (videos.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube')
+    || (videos.results || []).find(v => v.site === 'YouTube')
+    || null;
   if (trailer && trailer.site === 'YouTube') {
     document.getElementById('trailerSection').style.display = 'block';
-    document.getElementById('trailerFrame').src = `https://www.youtube.com/embed/${trailer.key}?rel=0`;
+    const origin = encodeURIComponent(window.location.origin || 'https://wipestream.app');
+    const embedURL = `https://www.youtube.com/embed/${trailer.key}?rel=0&modestbranding=1&enablejsapi=1&playsinline=1&origin=${origin}`;
+    const ytURL = `https://www.youtube.com/watch?v=${trailer.key}`;
+    const thumbURL = `https://img.youtube.com/vi/${trailer.key}/hqdefault.jpg`;
+    const iframe = document.getElementById('trailerFrame');
+    const fallback = document.getElementById('trailerFallback');
+    const ytLink = document.getElementById('trailerYTLink');
+    const thumb = document.getElementById('trailerThumb');
+    // Reset state
+    iframe.style.display = 'block';
+    fallback.style.display = 'none';
+    ytLink.href = ytURL;
+    thumb.src = thumbURL;
+    // Load embed — on error show fallback
+    iframe.onerror = null;
+    iframe.src = embedURL;
+    // Detect embed block via postMessage / timeout fallback
+    let embedOk = false;
+    const embedTimeout = setTimeout(() => {
+      if (!embedOk) {
+        iframe.style.display = 'none';
+        fallback.style.display = 'flex';
+      }
+    }, 8000);
+    window.addEventListener('message', function onMsg(e) {
+      if (e.origin === 'https://www.youtube.com') {
+        embedOk = true;
+        clearTimeout(embedTimeout);
+        window.removeEventListener('message', onMsg);
+      }
+    });
   }
 
   // Cast
@@ -1211,6 +1381,9 @@ function closeDetail() {
   document.getElementById('detailPage').classList.remove('open');
   document.body.style.overflow = '';
   document.getElementById('trailerFrame').src = '';
+  document.getElementById('trailerFrame').style.display = 'block';
+  document.getElementById('trailerFallback').style.display = 'none';
+  document.getElementById('trailerSection').style.display = 'none';
   playerVisible = false;
 }
 
