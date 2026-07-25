@@ -162,9 +162,10 @@ img{image-rendering:auto;-webkit-backface-visibility:hidden;backface-visibility:
 .hero-rating{color:var(--accent);font-weight:700}
 .hero-overview{font-size:0.95rem;color:var(--text2);max-width:500px;line-height:1.6;margin-bottom:28px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
-.btn-play{display:flex;align-items:center;gap:8px;padding:14px 28px;background:var(--accent);color:#000;font-weight:700;font-size:1rem;border-radius:var(--radius);transition:var(--transition)}
-.btn-play:hover{background:var(--accent2);transform:scale(1.03)}
-.btn-play svg{width:20px;height:20px}
+/* FIX: Play button - add touch-action:manipulation to remove 300ms tap delay */
+.btn-play{display:flex;align-items:center;gap:8px;padding:14px 28px;background:var(--accent);color:#000;font-weight:700;font-size:1rem;border-radius:var(--radius);transition:var(--transition);touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.btn-play:hover,.btn-play:active{background:var(--accent2);transform:scale(1.03)}
+.btn-play svg{width:20px;height:20px;pointer-events:none}
 .btn-info{display:flex;align-items:center;gap:8px;padding:14px 28px;background:var(--glass2);color:var(--text);font-weight:600;font-size:1rem;border-radius:var(--radius);border:1px solid var(--border);transition:var(--transition);backdrop-filter:blur(10px)}
 .btn-info:hover{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.2)}
 .btn-info svg{width:20px;height:20px}
@@ -229,16 +230,21 @@ img{image-rendering:auto;-webkit-backface-visibility:hidden;backface-visibility:
 .ep-list::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 /* Contain layout for cards */
 .film-poster{contain:strict;overflow:hidden}/* ===== PERFORMANCE: EXTREME 60FPS OPTIMIZATION ===== */
-.film-card{width:160px;flex-shrink:0;cursor:pointer;position:relative;will-change:transform;transform:translateZ(0);backface-visibility:hidden}
+/* FIX: film-card - add touch-action:manipulation to remove 300ms tap delay on mobile */
+.film-card{width:160px;flex-shrink:0;cursor:pointer;position:relative;will-change:transform;transform:translateZ(0);backface-visibility:hidden;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .film-card:hover{transform:scale(1.05) translateZ(0)}
 .film-poster{width:100%;aspect-ratio:2/3;border-radius:12px;overflow:hidden;background:#1a1a24;position:relative}
 .film-poster img{width:100%;height:100%;object-fit:cover;backface-visibility:hidden}
 .genre-row{display:flex;gap:14px;overflow-x:auto;padding:10px 24px 20px;scrollbar-width:none;-webkit-overflow-scrolling:touch;transform:translateZ(0)}
 .film-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:20px}
-.film-card-overlay{position:absolute;inset:0;border-radius:12px;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.3) 50%,transparent 100%);opacity:0;transition:0.2s;display:flex;flex-direction:column;justify-content:flex-end;padding:10px}
-.film-card-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:rgba(245,197,24,0.9);display:flex;align-items:center;justify-content:center;transition:var(--transition)}
-.film-card-play svg{width:20px;height:20px;color:#000;margin-left:2px}
-.film-card-wl{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;transition:var(--transition);z-index:5}
+/* FIX: film-card-overlay - show on hover (desktop) and always visible on touch devices */
+.film-card-overlay{position:absolute;inset:0;border-radius:12px;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.3) 50%,transparent 100%);opacity:0;transition:opacity 0.2s;display:flex;flex-direction:column;justify-content:flex-end;padding:10px;pointer-events:none}
+.film-card:hover .film-card-overlay{opacity:1}
+@media (hover:none){.film-card-overlay{opacity:1}} /* Always show on touch devices */
+.film-card-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:rgba(245,197,24,0.9);display:flex;align-items:center;justify-content:center;transition:var(--transition);pointer-events:none}
+.film-card-play svg{width:20px;height:20px;color:#000;margin-left:2px;pointer-events:none}
+/* FIX: Watchlist button - larger touch target, no tap delay */
+.film-card-wl{position:absolute;top:6px;right:6px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;transition:var(--transition);z-index:5;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .film-card-wl:hover{background:var(--accent)}
 .film-card-wl:hover svg{color:#000}
 .film-card-wl svg{width:14px;height:14px;color:var(--text2);transition:var(--transition)}
@@ -284,12 +290,13 @@ img{image-rendering:auto;-webkit-backface-visibility:hidden;backface-visibility:
 .detail-backdrop{position:relative;height:60vh;min-height:400px;overflow:hidden}
 .detail-backdrop-img{width:100%;height:100%;object-fit:cover;object-position:center top}
 .detail-backdrop-overlay{position:absolute;inset:0;background:var(--detail-overlay)}
-.detail-back{position:fixed;top:16px;left:16px;z-index:9999;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;transition:var(--transition);cursor:pointer;color:#fff}
-.detail-back:hover{background:var(--accent);color:#000;border-color:var(--accent)}
-.detail-back svg{width:20px;height:20px}
-.actor-back{position:fixed;top:16px;left:16px;z-index:9999;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;transition:var(--transition);cursor:pointer;color:#fff}
-.actor-back:hover{background:var(--accent);color:#000;border-color:var(--accent)}
-.actor-back svg{width:20px;height:20px}
+/* FIX BUG 2: Back buttons - larger touch target (48px min), higher z-index, no tap delay */
+.detail-back{position:fixed;top:12px;left:12px;z-index:19999;min-width:48px;min-height:48px;width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;transition:var(--transition);cursor:pointer;color:#fff;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.detail-back:hover,.detail-back:active{background:var(--accent);color:#000;border-color:var(--accent)}
+.detail-back svg{width:22px;height:22px;pointer-events:none}
+.actor-back{position:fixed;top:12px;left:12px;z-index:19999;min-width:48px;min-height:48px;width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;transition:var(--transition);cursor:pointer;color:#fff;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.actor-back:hover,.actor-back:active{background:var(--accent);color:#000;border-color:var(--accent)}
+.actor-back svg{width:22px;height:22px;pointer-events:none}
 .detail-content{position:relative;margin-top:-120px;padding:8px 32px 60px;z-index:2}
 .detail-main{display:flex;gap:32px;align-items:flex-start}
 .detail-poster{width:200px;flex-shrink:0;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:2px solid var(--border)}
@@ -305,9 +312,10 @@ img{image-rendering:auto;-webkit-backface-visibility:hidden;backface-visibility:
 .genre-tag{padding:4px 12px;border-radius:20px;background:var(--glass2);border:1px solid var(--border);font-size:0.78rem;font-weight:500;color:var(--text2)}
 .detail-overview{font-size:0.95rem;line-height:1.7;color:var(--text2);margin-bottom:24px}
 .detail-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:32px;align-items:center}
-.btn-watch{display:flex;align-items:center;gap:8px;padding:14px 28px;background:var(--accent);color:#000;font-weight:700;font-size:1rem;border-radius:var(--radius);transition:var(--transition)}
-.btn-watch:hover{background:var(--accent2);transform:scale(1.03)}
-.btn-watch svg{width:20px;height:20px}
+/* FIX: Watch button - add touch-action:manipulation to remove 300ms tap delay */
+.btn-watch{display:flex;align-items:center;gap:8px;padding:14px 28px;background:var(--accent);color:#000;font-weight:700;font-size:1rem;border-radius:var(--radius);transition:var(--transition);touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.btn-watch:hover,.btn-watch:active{background:var(--accent2);transform:scale(1.03)}
+.btn-watch svg{width:20px;height:20px;pointer-events:none}
 .btn-wl-detail{display:flex;align-items:center;gap:8px;padding:14px 24px;background:var(--glass2);border:1px solid var(--border);border-radius:var(--radius);font-weight:600;font-size:0.95rem;transition:var(--transition)}
 .btn-wl-detail:hover{border-color:var(--accent);color:var(--accent)}
 .btn-wl-detail.saved{background:rgba(245,197,24,0.1);border-color:var(--accent);color:var(--accent)}
@@ -446,7 +454,8 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
 .player-view{position:fixed;inset:0;z-index:2000;background:#000;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);overflow:hidden}
 .player-view.open{transform:translateY(0)}
 .player-view-topbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:rgba(0,0,0,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;min-height:52px}
-.player-view-back{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);border-radius:8px;padding:7px 12px;color:#fff;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);flex-shrink:0}
+/* FIX BUG 2: Player back button - no tap delay, larger touch area */
+.player-view-back{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);border-radius:8px;padding:10px 16px;min-height:44px;color:#fff;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);flex-shrink:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 .player-view-back:hover{background:rgba(255,255,255,0.16);border-color:rgba(255,255,255,0.28)}
 .player-view-back svg{width:15px;height:15px}
 .player-view-title{font-size:0.9rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
@@ -2208,31 +2217,73 @@ function renderWatchlist() {
 
 // ===== DETAIL PAGE =====
 // ===== NAVIGATION & BACK BUTTON SYNC =====
+// FIX BUG 1 & 2: Check playerView DOM state directly (not just playerVisible flag)
+// to handle edge cases where playerVisible was not set correctly
+// Flag to prevent double-close when '<' button already closed the UI
+// and history.back() fires onpopstate afterward
+let _navClosingFromButton = false;
+
 window.onpopstate = function(event) {
-  if (playerVisible) {
+  // If the UI was already closed by the '<' button, just clear the flag
+  // and don't do anything (the history entry was already consumed by history.back())
+  if (_navClosingFromButton) {
+    _navClosingFromButton = false;
+    return;
+  }
+  // Hardware back button (Android/browser) — close the TOP layer from NAV_STACK.
+  // Use NAV_STACK to determine what's on top (handles detail-on-top-of-actor case).
+  const playerViewEl = document.getElementById('playerView');
+  const isPlayerOpen = playerViewEl && playerViewEl.classList.contains('open');
+  if (playerVisible || isPlayerOpen) {
     closePlayer();
+    return;
+  }
+  // Close the topmost layer according to NAV_STACK
+  if (NAV_STACK.length > 0) {
+    const top = NAV_STACK[NAV_STACK.length - 1];
+    if (top.type === 'detail') {
+      closeDetail(true);
+    } else if (top.type === 'actor') {
+      closeActor(true);
+    }
+    return;
+  }
+  // Fallback: no stack — close by DOM state
+  if (document.getElementById('detailPage').classList.contains('open')) {
+    closeDetail(true);
   } else if (document.getElementById('actorPage').classList.contains('open')) {
     closeActor(true);
-  } else if (document.getElementById('detailPage').classList.contains('open')) {
-    closeDetail(true);
   } else if (currentPage !== 'home') {
     showPage('home', true);
   }
 };
 
 async function openDetail(id, type, autoPlay) {
-  // Push state to handle Android back button
-  history.pushState({ view: 'detail', id, type }, '');
-
   const detailEl = document.getElementById('detailPage');
+  const isAlreadyOpen = detailEl.classList.contains('open');
+  const actorEl = document.getElementById('actorPage');
+  const isActorOpen = actorEl && actorEl.classList.contains('open');
 
-  // Compute z-index: always above whatever is currently on top of the stack
-  const topZ = NAV_STACK.length > 0 ? NAV_STACK[NAV_STACK.length - 1].zIndex : 0;
-  const myZ   = Math.max(topZ + NAV_Z_STEP, NAV_Z_BASE);
-  detailEl.style.zIndex = String(myZ);
-
-  // Push this layer onto the navigation stack
-  NAV_STACK.push({ type: 'detail', zIndex: myZ });
+  if (isAlreadyOpen && !isActorOpen) {
+    // Detail is already open and actor page is NOT open
+    // (e.g. user clicked a similar film from within detail page).
+    // Replace the current history entry instead of pushing a new one,
+    // and replace the top NAV_STACK entry instead of stacking another.
+    history.replaceState({ view: 'detail', id, type }, '');
+    // Replace top stack entry if it's a detail
+    if (NAV_STACK.length > 0 && NAV_STACK[NAV_STACK.length - 1].type === 'detail') {
+      NAV_STACK[NAV_STACK.length - 1] = { type: 'detail', zIndex: NAV_STACK[NAV_STACK.length - 1].zIndex };
+    }
+  } else {
+    // Either fresh open OR opening detail from inside actor page.
+    // In both cases: push a new history entry and a new stack entry,
+    // and set z-index ABOVE the current top layer (actor page if open).
+    history.pushState({ view: 'detail', id, type }, '');
+    const topZ = NAV_STACK.length > 0 ? NAV_STACK[NAV_STACK.length - 1].zIndex : 0;
+    const myZ  = Math.max(topZ + NAV_Z_STEP, NAV_Z_BASE);
+    detailEl.style.zIndex = String(myZ);
+    NAV_STACK.push({ type: 'detail', zIndex: myZ });
+  }
 
   detailEl.classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2421,10 +2472,17 @@ function toggleReview(bodyId, toggleId) {
 }
 
 function closeDetail(fromPopState = false) {
-  // If not from back button/popstate, go back in history
-  if (!fromPopState) {
-    history.back();
-    return;
+  const detailEl = document.getElementById('detailPage');
+  // Guard: if already closed, do nothing (prevents double-close race condition)
+  if (!detailEl.classList.contains('open')) return;
+
+  // Pop the topmost 'detail' entry from NAV_STACK (search from top, not just top-1)
+  // This handles edge cases where stack top might be mismatched
+  for (let i = NAV_STACK.length - 1; i >= 0; i--) {
+    if (NAV_STACK[i].type === 'detail') {
+      NAV_STACK.splice(i, 1);
+      break;
+    }
   }
 
   // Close player view first if open
@@ -2432,13 +2490,27 @@ function closeDetail(fromPopState = false) {
   if (pv.classList.contains('open')) {
     pv.classList.remove('open');
     document.getElementById('playerFrame').src = '';
+    playerVisible = false;
   }
 
-  const detailEl = document.getElementById('detailPage');
+  // Close the detail page immediately (no waiting for onpopstate)
   detailEl.classList.remove('open');
-  document.body.style.overflow = '';
+  // Reset z-index to base so it doesn't block actor page if actor is still open
+  detailEl.style.zIndex = String(NAV_Z_BASE);
+  // Only restore body overflow if actor page is also closed
+  const actorStillOpen = document.getElementById('actorPage').classList.contains('open');
+  if (!actorStillOpen) {
+    document.body.style.overflow = '';
+  }
   killTrailer();
   playerVisible = false;
+
+  // Sync browser history: if called from '<' button (not from hardware back),
+  // set flag so onpopstate knows UI is already closed, then go back
+  if (!fromPopState) {
+    _navClosingFromButton = true;
+    history.back();
+  }
 }
 
 // ===== PLAYER =====
@@ -2610,6 +2682,7 @@ async function openPlayer() {
   // Open player view (slides up from bottom)
   pv.classList.add('open');
   document.body.style.overflow = 'hidden';
+  playerVisible = true; // FIX BUG 1: set playerVisible=true so back button works
 
   // Load stream
   await loadStream(id, type, 0, currentSeason, currentEpisode);
@@ -2620,7 +2693,8 @@ function closePlayer() {
   const pv = document.getElementById('playerView');
   pv.classList.remove('open');
   document.getElementById('playerFrame').src = '';
-  document.body.style.overflow = 'hidden';
+  playerVisible = false; // FIX BUG 1: reset playerVisible
+  document.body.style.overflow = 'hidden'; // keep detail page scroll locked (detail is still open)
   // Cleanup server dropdown outside-click listener
   document.removeEventListener('click', closeServerDropdownOutside);
 }
@@ -2734,16 +2808,29 @@ async function playEpisode(epNum) {
 
 // ===== ACTOR PAGE =====
 async function openActor(actorId) {
-  history.pushState({ view: 'actor', id: actorId }, '');
   const actorEl = document.getElementById('actorPage');
+  const isAlreadyOpen = actorEl.classList.contains('open');
+  const detailEl = document.getElementById('detailPage');
+  const isDetailOpen = detailEl && detailEl.classList.contains('open');
 
-  // Compute z-index: always above whatever is currently on top of the stack
-  const topZ = NAV_STACK.length > 0 ? NAV_STACK[NAV_STACK.length - 1].zIndex : 0;
-  const myZ   = Math.max(topZ + NAV_Z_STEP, 4000);
-  actorEl.style.zIndex = String(myZ);
-
-  // Push this layer onto the navigation stack
-  NAV_STACK.push({ type: 'actor', zIndex: myZ });
+  if (isAlreadyOpen && !isDetailOpen) {
+    // Actor page already open and NO detail page on top
+    // (e.g. user clicked another actor from within actor filmography).
+    // Replace history entry and NAV_STACK entry — no new stack layer needed.
+    history.replaceState({ view: 'actor', id: actorId }, '');
+    if (NAV_STACK.length > 0 && NAV_STACK[NAV_STACK.length - 1].type === 'actor') {
+      NAV_STACK[NAV_STACK.length - 1] = { type: 'actor', zIndex: NAV_STACK[NAV_STACK.length - 1].zIndex };
+    }
+  } else {
+    // Either fresh open OR opening actor from inside detail page (deep chain).
+    // In both cases: push a new history entry and a new stack entry,
+    // and set z-index ABOVE the current top layer (detail page if open).
+    history.pushState({ view: 'actor', id: actorId }, '');
+    const topZ = NAV_STACK.length > 0 ? NAV_STACK[NAV_STACK.length - 1].zIndex : 0;
+    const myZ  = Math.max(topZ + NAV_Z_STEP, 4000);
+    actorEl.style.zIndex = String(myZ);
+    NAV_STACK.push({ type: 'actor', zIndex: myZ });
+  }
 
   actorEl.classList.add('open');
   document.getElementById('actorName').textContent = 'Loading...';
@@ -2779,15 +2866,33 @@ async function openActor(actorId) {
 }
 
 function closeActor(fromPopState = false) {
-  if (!fromPopState) {
-    history.back();
-    return;
-  }
   const actorEl = document.getElementById('actorPage');
+  // Guard: if already closed, do nothing (prevents double-close race condition)
+  if (!actorEl.classList.contains('open')) return;
+
+  // Pop the topmost 'actor' entry from NAV_STACK (search from top)
+  for (let i = NAV_STACK.length - 1; i >= 0; i--) {
+    if (NAV_STACK[i].type === 'actor') {
+      NAV_STACK.splice(i, 1);
+      break;
+    }
+  }
+
+  // Close the actor page immediately (no waiting for onpopstate)
   actorEl.classList.remove('open');
-  // If detail page is not open, restore overflow
-  if (!document.getElementById('detailPage').classList.contains('open')) {
+  // Reset z-index to base so stale high z-index doesn't block future layers
+  actorEl.style.zIndex = '4000';
+  // Restore body overflow only if no other overlay is open
+  const detailOpen = document.getElementById('detailPage').classList.contains('open');
+  if (!detailOpen) {
     document.body.style.overflow = '';
+  }
+
+  // Sync browser history: if called from '<' button (not from hardware back),
+  // set flag so onpopstate knows UI is already closed, then go back
+  if (!fromPopState) {
+    _navClosingFromButton = true;
+    history.back();
   }
 }
 
