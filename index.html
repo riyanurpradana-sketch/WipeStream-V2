@@ -79,6 +79,13 @@ img{image-rendering:auto;-webkit-backface-visibility:hidden;backface-visibility:
 .ep-list::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 /* Contain layout for cards */
 .film-poster{contain:strict;overflow:hidden}
+/* Custom thin scrollbar for episode list */
+.ep-list::-webkit-scrollbar{width:3px}
+.ep-list::-webkit-scrollbar-track{background:transparent}
+.ep-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+.ep-list::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+/* Contain layout for cards */
+.film-poster{contain:strict;overflow:hidden}
 /* ===== NAVBAR ===== */
 .navbar{position:fixed;top:0;left:0;right:0;z-index:1000;height:64px;display:flex;align-items:center;padding:0 24px;gap:24px;background:var(--navbar-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:var(--transition)}
 .nav-logo{display:flex;align-items:center;gap:10px;font-size:1.4rem;font-weight:800;letter-spacing:-0.5px;color:var(--accent);flex-shrink:0}
@@ -132,8 +139,8 @@ img{image-rendering:auto;-webkit-backface-visibility:hidden;backface-visibility:
 .sh-item-del:hover{background:rgba(239,68,68,0.15);color:var(--red)}
 .sh-item-del svg{width:11px;height:11px}
 .sh-empty{padding:16px 14px;font-size:0.82rem;color:var(--text3);text-align:center}
-.nav-search{background:var(--glass);border:1px solid var(--border);border-radius:24px;padding:8px 16px 8px 40px;color:var(--text);font-size:0.875rem;width:220px;transition:var(--transition);outline:none}
-.nav-search:focus{border-color:var(--accent);width:280px;background:var(--glass2)}
+.nav-search{background:var(--glass);border:1px solid var(--border);border-radius:24px;padding:8px 16px 8px 40px;color:var(--text);font-size:0.875rem;width:180px;transition:var(--transition);outline:none}
+.nav-search:focus{border-color:var(--accent);width:240px;background:var(--glass2)}
 .nav-search::placeholder{color:var(--text3)}
 .nav-search-icon{position:absolute;left:12px;color:var(--text3);pointer-events:none}
 .nav-search-icon svg{width:16px;height:16px}
@@ -145,7 +152,7 @@ img{image-rendering:auto;-webkit-backface-visibility:hidden;backface-visibility:
 .hero{position:relative;height:100vh;min-height:600px;max-height:900px;overflow:hidden;margin-top:0}
 .hero-bg{position:absolute;inset:0;background-size:cover;background-position:center top;transition:opacity 0.8s ease}
 .hero-overlay{position:absolute;inset:0;background:var(--hero-overlay)}
-.hero-content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:0 48px 80px}
+.hero-content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:0 48px 80px;align-items:flex-start;text-align:left}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent);color:#000;font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:4px;margin-bottom:16px;width:fit-content;letter-spacing:0.5px}
 .hero-badge svg{width:12px;height:12px}
 .hero-title{font-size:clamp(2rem,5vw,3.5rem);font-weight:900;line-height:1.1;margin-bottom:12px;max-width:600px;text-shadow:0 2px 20px rgba(0,0,0,0.8)}
@@ -192,13 +199,43 @@ img{image-rendering:auto;-webkit-backface-visibility:hidden;backface-visibility:
 .genre-arrow.hidden{opacity:0!important;pointer-events:none!important}
 
 /* ===== FILM CARD ===== */
-.film-card{flex-shrink:0;width:150px;cursor:pointer;transition:var(--transition);position:relative}
-.film-card:hover{transform:translateY(-6px) scale(1.03)}
-.film-card:hover .film-card-overlay{opacity:1}
-.film-poster{width:100%;aspect-ratio:2/3;border-radius:var(--radius2);overflow:hidden;background:var(--bg3);position:relative}
-.film-poster img{width:100%;height:100%;object-fit:cover;transition:var(--transition)}
-.film-card:hover .film-poster img{transform:scale(1.05)}
-.film-card-overlay{position:absolute;inset:0;border-radius:var(--radius2);background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.3) 50%,transparent 100%);opacity:0;transition:var(--transition);display:flex;flex-direction:column;justify-content:flex-end;padding:10px}
+/* ===== PERFORMANCE: GPU ACCELERATION ===== */
+.hero-bg{will-change:opacity;transform:translateZ(0)}
+.hero-content{transform:translateZ(0)}
+.film-card{will-change:transform;transform:translateZ(0);contain:layout style paint}
+.film-card:hover{transform:translateY(-6px) scale(1.03) translateZ(0)}
+.genre-row{-webkit-overflow-scrolling:touch;transform:translateZ(0)}
+.detail-page{will-change:transform;transform:translateX(100%) translateZ(0)}
+.detail-page.open{transform:translateX(0) translateZ(0)}
+.actor-page{will-change:transform}
+.player-view{will-change:transform}
+.navbar{will-change:transform;transform:translateZ(0)}
+/* Smooth image rendering */
+img{image-rendering:auto;-webkit-backface-visibility:hidden;backface-visibility:hidden}
+/* Staggered card fade-in */
+@keyframes cardFadeIn{from{opacity:0;transform:translateY(16px) translateZ(0)}to{opacity:1;transform:translateY(0) translateZ(0)}}
+.film-card.animate-in{animation:cardFadeIn 0.35s cubic-bezier(0.4,0,0.2,1) both}
+/* Shimmer skeleton */
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skeleton{background:linear-gradient(90deg,var(--bg3) 25%,rgba(255,255,255,0.06) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shimmer 1.8s ease-in-out infinite}
+/* Smooth page transitions */
+.detail-page,.actor-page,.player-view{transition:transform 0.38s cubic-bezier(0.4,0,0.2,1)}
+/* Momentum scroll containers */
+.ep-list,.genre-row,.film-grid{-webkit-overflow-scrolling:touch}
+/* Custom thin scrollbar for episode list */
+.ep-list::-webkit-scrollbar{width:3px}
+.ep-list::-webkit-scrollbar-track{background:transparent}
+.ep-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+.ep-list::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+/* Contain layout for cards */
+.film-poster{contain:strict;overflow:hidden}/* ===== PERFORMANCE: EXTREME 60FPS OPTIMIZATION ===== */
+.film-card{width:160px;flex-shrink:0;cursor:pointer;position:relative;will-change:transform;transform:translateZ(0);backface-visibility:hidden}
+.film-card:hover{transform:scale(1.05) translateZ(0)}
+.film-poster{width:100%;aspect-ratio:2/3;border-radius:12px;overflow:hidden;background:#1a1a24;position:relative}
+.film-poster img{width:100%;height:100%;object-fit:cover;backface-visibility:hidden}
+.genre-row{display:flex;gap:14px;overflow-x:auto;padding:10px 24px 20px;scrollbar-width:none;-webkit-overflow-scrolling:touch;transform:translateZ(0)}
+.film-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:20px}
+.film-card-overlay{position:absolute;inset:0;border-radius:12px;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.3) 50%,transparent 100%);opacity:0;transition:0.2s;display:flex;flex-direction:column;justify-content:flex-end;padding:10px}
 .film-card-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:rgba(245,197,24,0.9);display:flex;align-items:center;justify-content:center;transition:var(--transition)}
 .film-card-play svg{width:20px;height:20px;color:#000;margin-left:2px}
 .film-card-wl{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;transition:var(--transition);z-index:5}
@@ -247,9 +284,12 @@ img{image-rendering:auto;-webkit-backface-visibility:hidden;backface-visibility:
 .detail-backdrop{position:relative;height:60vh;min-height:400px;overflow:hidden}
 .detail-backdrop-img{width:100%;height:100%;object-fit:cover;object-position:center top}
 .detail-backdrop-overlay{position:absolute;inset:0;background:var(--detail-overlay)}
-.detail-back{position:fixed;top:20px;left:20px;z-index:10;width:44px;height:44px;border-radius:50%;background:rgba(10,10,15,0.85);backdrop-filter:blur(12px);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;transition:var(--transition);cursor:pointer}
+.detail-back{position:fixed;top:16px;left:16px;z-index:9999;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;transition:var(--transition);cursor:pointer;color:#fff}
 .detail-back:hover{background:var(--accent);color:#000;border-color:var(--accent)}
 .detail-back svg{width:20px;height:20px}
+.actor-back{position:fixed;top:16px;left:16px;z-index:9999;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,0.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;transition:var(--transition);cursor:pointer;color:#fff}
+.actor-back:hover{background:var(--accent);color:#000;border-color:var(--accent)}
+.actor-back svg{width:20px;height:20px}
 .detail-content{position:relative;margin-top:-120px;padding:8px 32px 60px;z-index:2}
 .detail-main{display:flex;gap:32px;align-items:flex-start}
 .detail-poster{width:200px;flex-shrink:0;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:2px solid var(--border)}
@@ -502,7 +542,7 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
 .trailer-title{font-size:1.1rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .trailer-title svg{width:18px;height:18px;color:var(--accent)}
 .trailer-frame{position:relative;padding-bottom:56.25%;border-radius:var(--radius);overflow:hidden;background:#000}
-.trailer-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+.trailer-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:none}#trailerPlayerMount iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
 
 /* ===== CAST ===== */
 .cast-section{margin-bottom:32px}
@@ -552,9 +592,6 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
 /* ===== ACTOR PAGE ===== */
 .actor-page{position:fixed;inset:0;z-index:4000;background:var(--bg);overflow-y:auto;overscroll-behavior:contain;transform:translateX(100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1)}
 .actor-page.open{transform:translateX(0)}
-.actor-back{position:fixed;top:20px;left:20px;z-index:10;width:44px;height:44px;border-radius:50%;background:rgba(10,10,15,0.85);backdrop-filter:blur(12px);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;transition:var(--transition);cursor:pointer}
-.actor-back:hover{background:var(--accent);color:#000;border-color:var(--accent)}
-.actor-back svg{width:20px;height:20px}
 .actor-content{padding:80px 32px 60px}
 .actor-profile{display:flex;gap:32px;align-items:flex-start;margin-bottom:40px}
 .actor-photo-big{width:180px;height:180px;border-radius:50%;overflow:hidden;flex-shrink:0;border:3px solid var(--accent);box-shadow:0 0 40px rgba(245,197,24,0.2)}
@@ -620,7 +657,25 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
 .bottom-nav-item.active{color:var(--accent)}
 .bottom-nav-item svg{width:22px;height:22px}
 
-/* ===== TOAST ===== */
+/* ===== APP DOWNLOAD MODAL (Web Only) ===== */
+.app-modal-overlay{position:fixed;inset:0;z-index:11000;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:24px;animation:fadeIn 0.3s ease}
+.app-modal{background:var(--bg3);border:1px solid var(--border);border-radius:24px;width:100%;max-width:400px;padding:32px 24px;text-align:center;box-shadow:var(--shadow);position:relative;animation:modalUp 0.4s cubic-bezier(0.4,0,0.2,1)}
+.app-modal-icon{width:80px;height:80px;background:var(--accent);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;color:#000;box-shadow:0 10px 30px rgba(245,197,24,0.3)}
+.app-modal-title{font-size:1.5rem;font-weight:900;margin-bottom:8px;color:var(--text)}
+.app-modal-sub{font-size:0.9rem;color:var(--text2);margin-bottom:24px;line-height:1.5}
+.app-modal-features{text-align:left;background:rgba(255,255,255,0.03);border-radius:16px;padding:16px;margin-bottom:28px;display:flex;flex-direction:column;gap:12px}
+.app-feature{display:flex;align-items:center;gap:10px;font-size:0.85rem;color:var(--text);font-weight:600}
+.app-feature svg{width:18px;height:18px;color:var(--accent)}
+.app-modal-actions{display:flex;flex-direction:column;gap:12px}
+.app-modal-btn{padding:14px;border-radius:14px;font-size:0.95rem;font-weight:700;text-decoration:none;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:8px}
+.app-modal-btn.primary{background:var(--accent);color:#000}
+.app-modal-btn.primary:hover{background:var(--accent2);transform:scale(1.02)}
+.app-modal-btn.secondary{background:var(--glass);color:var(--text);border:1px solid var(--border)}
+.app-modal-btn.secondary:hover{background:var(--glass2)}
+.app-modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:var(--transition)}
+.app-modal-close:hover{background:var(--glass);color:var(--text)}
+@keyframes modalUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 /* Brave Banner */
 #braveBanner{position:fixed;bottom:0;left:0;right:0;z-index:8888;display:flex;align-items:center;gap:12px;padding:12px 20px;background:rgba(18,18,24,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(255,165,0,0.25);box-shadow:0 -4px 24px rgba(0,0,0,0.4);animation:braveSlideUp 0.4s cubic-bezier(0.4,0,0.2,1) forwards}
 @keyframes braveSlideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -653,13 +708,25 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:768px){
-  .navbar{padding:0 16px;gap:12px}
+  .navbar{padding:0 12px;gap:6px;height:56px}
+  .nav-logo{font-size:1.05rem;gap:4px}
+  .nav-logo svg{width:20px;height:20px}
   .nav-links{display:none}
-  .nav-search{width:160px}
-  .nav-search:focus{width:200px}
-  .search-history-panel{width:260px;right:-8px}
+  .nav-search-wrap{flex:1;max-width:140px;margin-left:auto}
+  .nav-search{width:100%;padding:6px 10px 6px 30px;font-size:0.75rem;border-radius:18px}
+  .nav-search:focus{width:100%;border-color:var(--accent)}
+  .nav-search-icon{left:10px}
+  .nav-search-icon svg{width:12px;height:12px}
+  .search-history-panel{width:240px;right:-10px}
+  .nav-settings-btn span{display:none}
+  .nav-settings-btn{padding:6px}
   .bottom-nav{display:block}
-  .hero-content{padding:0 20px 100px}
+  .hero-content{padding:0 16px 60px;align-items:flex-start;text-align:left;justify-content:flex-end}
+  .hero-title{max-width:100%;font-size:1.6rem;text-align:left;margin-left:0}
+  .hero-meta{justify-content:flex-start}
+  .hero-overview{max-width:100%;font-size:0.82rem;-webkit-line-clamp:2;text-align:left}
+  .hero-actions{justify-content:flex-start;gap:8px}
+  .btn-play,.btn-info{padding:10px 20px;font-size:0.9rem}
   .section-header,.genre-header{padding:0 16px}
   .genre-row{padding:8px 16px 16px}
   .grid-section{padding:16px}
@@ -1225,18 +1292,18 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
         Official Trailer
       </div>
-      <div class="trailer-frame" id="trailerFrameWrap">
-        <iframe id="trailerFrame" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-        <div id="trailerFallback" style="display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;background:#000;">
-          <img id="trailerThumb" src="" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.55;">
-          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.85) 0%,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.1) 100%);z-index:1;"></div>
-          <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:14px;">
-            <a id="trailerYTLink" href="#" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,0.35);transition:all 0.2s;text-decoration:none;" onmouseover="this.style.background='rgba(255,255,255,0.28)';this.style.transform='scale(1.08)'" onmouseout="this.style.background='rgba(255,255,255,0.15)';this.style.transform='scale(1)'">
-              <svg viewBox="0 0 24 24" fill="white" style="width:30px;height:30px;margin-left:4px"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            </a>
-            <span style="color:rgba(255,255,255,0.9);font-size:0.82rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;background:rgba(0,0,0,0.5);padding:4px 12px;border-radius:20px;backdrop-filter:blur(4px)">Watch on YouTube</span>
-          </div>
-        </div>
+      <div class="trailer-frame" id="trailerFrameWrap" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:12px; background:#000;">
+        <iframe id="trailerIframe"
+                style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
+                allowfullscreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+        </iframe>
+      </div>
+      <div id="trailerExternalLink" style="margin-top:12px; display:flex; justify-content:center;">
+        <a id="ytOpenBtn" href="#" target="_blank" style="display:flex; align-items:center; gap:8px; padding:10px 18px; background:rgba(255,255,255,0.08); border:1px solid var(--border); border-radius:12px; font-size:0.8rem; font-weight:600; color:var(--text2); transition:all 0.2s;">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:16px; height:16px; color:#ff0000;"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.016 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          Tonton di YouTube
+        </a>
       </div>
     </div>
 
@@ -1360,6 +1427,49 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
 
 <!-- TOAST CONTAINER -->
 <div class="toast-container" id="toastContainer"></div>
+
+<!-- APP DOWNLOAD MODAL (Visible on Web) -->
+<div class="app-modal-overlay" id="appDownloadModal">
+  <div class="app-modal">
+    <button class="app-modal-close" onclick="dismissAppModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="app-modal-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="40" height="40"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    </div>
+    <h2 class="app-modal-title" id="mdlTitle">Pasang StreamWipe</h2>
+    <p class="app-modal-sub" id="mdlSub">Nikmati pengalaman menonton terbaik dengan aplikasi resmi kami.</p>
+
+    <div class="app-modal-features">
+      <div class="app-feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="fAdBlock">Tanpa Iklan & Pop-up Ilegal</span>
+      </div>
+      <div class="app-feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="fSmooth">Streaming Lebih Lancar (60 FPS)</span>
+      </div>
+      <div class="app-feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="fSubs">Bisa Upload Subtitle Sendiri</span>
+      </div>
+      <div class="app-feature">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="fData">Hemat Kuota & Loading Cepat</span>
+      </div>
+    </div>
+
+    <div class="app-modal-actions">
+      <a class="app-modal-btn primary" href="StreamWipe.apk" download="StreamWipe.apk" onclick="dismissAppModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download APK Native
+      </a>
+      <button class="app-modal-btn secondary" id="mdlPwaBtn" onclick="triggerPWAInstall(); dismissAppModal();" style="display:none">
+        Pasang Lewat Browser
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- BRAVE BROWSER BANNER -->
 <div id="braveBanner" style="display:none">
@@ -2097,7 +2207,23 @@ function renderWatchlist() {
 }
 
 // ===== DETAIL PAGE =====
+// ===== NAVIGATION & BACK BUTTON SYNC =====
+window.onpopstate = function(event) {
+  if (playerVisible) {
+    closePlayer();
+  } else if (document.getElementById('actorPage').classList.contains('open')) {
+    closeActor(true);
+  } else if (document.getElementById('detailPage').classList.contains('open')) {
+    closeDetail(true);
+  } else if (currentPage !== 'home') {
+    showPage('home', true);
+  }
+};
+
 async function openDetail(id, type, autoPlay) {
+  // Push state to handle Android back button
+  history.pushState({ view: 'detail', id, type }, '');
+
   const detailEl = document.getElementById('detailPage');
 
   // Compute z-index: always above whatever is currently on top of the stack
@@ -2172,82 +2298,24 @@ async function openDetail(id, type, autoPlay) {
     ? `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> In Watchlist`
     : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Add to Watchlist`;
 
-  // Trailer
+  // Trailer (YouTube with WebView Origin Fix)
   const trailer = (videos.results || []).find(v => v.type === 'Trailer' && v.site === 'YouTube')
     || (videos.results || []).find(v => v.site === 'YouTube')
     || null;
+
+  const trailerSection = document.getElementById('trailerSection');
+  const trailerIframe = document.getElementById('trailerIframe');
+  const btn = document.getElementById('ytOpenBtn');
+
   if (trailer && trailer.site === 'YouTube') {
-    document.getElementById('trailerSection').style.display = 'block';
-    const origin = encodeURIComponent(window.location.origin || 'https://wipestream.app');
-    const embedURL = `https://www.youtube.com/embed/${trailer.key}?rel=0&modestbranding=1&enablejsapi=1&playsinline=1&origin=${origin}`;
-    const ytURL = `https://www.youtube.com/watch?v=${trailer.key}`;
-    const thumbURL = `https://img.youtube.com/vi/${trailer.key}/hqdefault.jpg`;
-    const iframe = document.getElementById('trailerFrame');
-    const fallback = document.getElementById('trailerFallback');
-    const ytLink = document.getElementById('trailerYTLink');
-    const thumb = document.getElementById('trailerThumb');
-    // Reset state
-    iframe.style.display = 'block';
-    fallback.style.display = 'none';
-    ytLink.href = ytURL;
-    thumb.src = thumbURL;
-    // Load embed — only show fallback if iframe truly fails to load
-    let iframeLoaded = false;
-    let embedErrored = false;
-
-    iframe.onload = function() {
-      iframeLoaded = true; // iframe responded — video likely playing, never show fallback
-    };
-    iframe.onerror = function() {
-      embedErrored = true;
-      iframe.style.display = 'none';
-      fallback.style.display = 'flex';
-    };
-    iframe.src = embedURL;
-
-    // Timeout: only trigger fallback if iframe never loaded at all (network/CSP block)
-    // If iframeLoaded=true, video is playing — do NOT interrupt with fallback
-    const embedTimeout = setTimeout(() => {
-      if (!iframeLoaded && !embedErrored) {
-        // iframe never fired onload → truly blocked
-        iframe.style.display = 'none';
-        fallback.style.display = 'flex';
-      }
-      // iframeLoaded=true → video playing fine, do nothing
-    }, 10000);
-
-    // Listen for YouTube postMessage to detect active playback or real errors
-    function onYTMsg(e) {
-      if (e.origin !== 'https://www.youtube.com') return;
-      try {
-        const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
-        if (data && data.event === 'infoDelivery' && data.info) {
-          const ps = data.info.playerState;
-          // playerState: -1=unstarted, 0=ended, 1=playing, 2=paused, 3=buffering, 5=cued
-          if (ps === 1 || ps === 2 || ps === 3 || ps === 0 || ps === 5) {
-            clearTimeout(embedTimeout);
-            iframeLoaded = true; // video is active — never show fallback
-          }
-        }
-        if (data && data.event === 'onError') {
-          // YouTube reported a real error (video unavailable, private, etc.)
-          clearTimeout(embedTimeout);
-          window.removeEventListener('message', onYTMsg);
-          iframe.style.display = 'none';
-          fallback.style.display = 'flex';
-        }
-      } catch(err) { /* ignore parse errors */ }
-    }
-    window.addEventListener('message', onYTMsg);
-
-    // Expose cleanup so killTrailer() can remove listener & clear timeout
-    iframe._cleanupYTMsg = function() {
-      clearTimeout(embedTimeout);
-      window.removeEventListener('message', onYTMsg);
-      iframe.onload = null;
-      iframe.onerror = null;
-      iframe._cleanupYTMsg = null;
-    };
+    trailerSection.style.display = 'block';
+    // Using youtube-nocookie and origin param to bypass WebView blocks
+    const ytKey = trailer.key;
+    const origin = window.location.origin === 'null' ? 'https://www.youtube.com' : window.location.origin;
+    trailerIframe.src = `https://www.youtube-nocookie.com/embed/${ytKey}?enablejsapi=1&rel=0&modestbranding=1&origin=${origin}`;
+    btn.href = `https://www.youtube.com/watch?v=${ytKey}`;
+  } else {
+    trailerSection.style.display = 'none';
   }
 
   // Cast
@@ -2352,7 +2420,13 @@ function toggleReview(bodyId, toggleId) {
   }
 }
 
-function closeDetail() {
+function closeDetail(fromPopState = false) {
+  // If not from back button/popstate, go back in history
+  if (!fromPopState) {
+    history.back();
+    return;
+  }
+
   // Close player view first if open
   const pv = document.getElementById('playerView');
   if (pv.classList.contains('open')) {
@@ -2362,20 +2436,7 @@ function closeDetail() {
 
   const detailEl = document.getElementById('detailPage');
   detailEl.classList.remove('open');
-  detailEl.style.zIndex = '';
-
-  // Pop this layer from the navigation stack
-  // Find and remove the topmost 'detail' entry
-  for (let i = NAV_STACK.length - 1; i >= 0; i--) {
-    if (NAV_STACK[i].type === 'detail') { NAV_STACK.splice(i, 1); break; }
-  }
-
-  // If there's still something on the stack (actor page below), keep body scroll hidden
-  // Otherwise restore scroll
-  if (NAV_STACK.length === 0) {
-    document.body.style.overflow = '';
-  }
-
+  document.body.style.overflow = '';
   killTrailer();
   playerVisible = false;
 }
@@ -2505,24 +2566,11 @@ async function selectServer(idx, id, type) {
   await loadStream(id, type, idx, currentSeason, currentEpisode);
 }
 
-// Open dedicated player view (cinema mode)
-// Kill YouTube trailer to prevent audio overlap
 function killTrailer() {
-  const tf = document.getElementById('trailerFrame');
-  if (!tf) return;
-  // 0) Cleanup postMessage listener + timeout from trailer load
-  if (typeof tf._cleanupYTMsg === 'function') tf._cleanupYTMsg();
-  // 1) postMessage pause (YouTube JS API)
-  try {
-    tf.contentWindow.postMessage(
-      JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*'
-    );
-  } catch (_) {}
-  // 2) Nuke src — guaranteed stop
-  tf.src = '';
-  document.getElementById('trailerSection').style.display = 'none';
-  document.getElementById('trailerFallback').style.display = 'none';
-  document.getElementById('trailerFrame').style.display = 'block';
+  const iframe = document.getElementById('trailerIframe');
+  if (iframe) iframe.src = '';
+  const ts = document.getElementById('trailerSection');
+  if (ts) ts.style.display = 'none';
 }
 
 async function openPlayer() {
@@ -2686,6 +2734,7 @@ async function playEpisode(epNum) {
 
 // ===== ACTOR PAGE =====
 async function openActor(actorId) {
+  history.pushState({ view: 'actor', id: actorId }, '');
   const actorEl = document.getElementById('actorPage');
 
   // Compute z-index: always above whatever is currently on top of the stack
@@ -2729,18 +2778,15 @@ async function openActor(actorId) {
   document.getElementById('actorPage').scrollTop = 0;
 }
 
-function closeActor() {
+function closeActor(fromPopState = false) {
+  if (!fromPopState) {
+    history.back();
+    return;
+  }
   const actorEl = document.getElementById('actorPage');
   actorEl.classList.remove('open');
-  actorEl.style.zIndex = '';
-
-  // Pop the topmost 'actor' entry from the navigation stack
-  for (let i = NAV_STACK.length - 1; i >= 0; i--) {
-    if (NAV_STACK[i].type === 'actor') { NAV_STACK.splice(i, 1); break; }
-  }
-
-  // If nothing left on stack, restore body scroll
-  if (NAV_STACK.length === 0) {
+  // If detail page is not open, restore overflow
+  if (!document.getElementById('detailPage').classList.contains('open')) {
     document.body.style.overflow = '';
   }
 }
@@ -2753,7 +2799,10 @@ function toggleActorBio() {
 }
 
 // ===== PAGES =====
-function showPage(page) {
+function showPage(page, fromPopState = false) {
+  if (page !== 'home' && !fromPopState) {
+    history.pushState({ view: 'page', page }, '');
+  }
   currentPage = page;
   const pages = ['home', 'movies', 'tv', 'trending', 'toprated', 'upcoming', 'watchlist', 'search', 'settings'];
   pages.forEach(p => {
@@ -3534,7 +3583,10 @@ const TRANSLATIONS = {
     stAbout:'About', stVersion:'Version 23.0 — Built with TMDB API',
     stAboutDesc:'WipeStream is a free movie and TV streaming discovery app powered by The Movie Database (TMDB). All content metadata is provided by TMDB. Streaming is provided by third-party embed servers.',
     confirmLang:'Changing language will reload the page. Continue?', confirmHistory:'Clear all search history?', confirmWatchlist:'Clear your entire watchlist?', confirmAllData:'Clear ALL WipeStream data? This cannot be undone.',
-    ok:'OK', cancel:'Cancel', cleared:'Cleared!', braveTitle:'Better experience with Brave', braveSub:'Browse without ads and trackers'
+    ok:'OK', cancel:'Cancel', cleared:'Cleared!', braveTitle:'Better experience with Brave', braveSub:'Browse without ads and trackers',
+    mdlTitle:'Install StreamWipe', mdlSub:'Enjoy the best experience with our official app.',
+    fAdBlock:'No Ads & Illegal Pop-ups', fSmooth:'Smoother Streaming (60 FPS)', fSubs:'Upload Custom Subtitles', fData:'Save Data & Fast Loading',
+    btnNative:'Download Native APK', btnWeb:'Install via Browser'
   },
   id: {
     home:'Beranda', movies:'Film', tv:'Serial TV', trending:'Trending', toprated:'Terbaik', watchlist:'Daftar Tonton', settings:'Pengaturan',
@@ -3546,10 +3598,13 @@ const TRANSLATIONS = {
     stOpacity:'Transparansi Wallpaper', stOpacityDesc:'Tingkat transparansi gambar latar',
     stLanguage:'Bahasa', stLangNote:'Mengganti bahasa akan memuat ulang halaman dan memperbarui semua konten dari TMDB.',
     stStorage:'Penyimpanan & Cache', stClearHistory:'Hapus Riwayat Pencarian', stClearWatchlist:'Hapus Daftar Tonton', stClearAll:'Hapus Semua Data',
-    stAbout:'Tentang', stVersion:'Versi 22.0 — Dibuat dengan TMDB API',
+    stAbout:'Tentang', stVersion:'Versi 27.0 — Dibuat dengan TMDB API',
     stAboutDesc:'WipeStream adalah aplikasi penemuan streaming film dan TV gratis yang didukung oleh The Movie Database (TMDB). Semua metadata konten disediakan oleh TMDB.',
     confirmLang:'Mengganti bahasa akan memuat ulang halaman. Lanjutkan?', confirmHistory:'Hapus semua riwayat pencarian?', confirmWatchlist:'Hapus seluruh daftar tonton?', confirmAllData:'Hapus SEMUA data WipeStream? Tindakan ini tidak dapat dibatalkan.',
-    ok:'OK', cancel:'Batal', cleared:'Berhasil dihapus!', braveTitle:'Pengalaman lebih baik dengan Brave', braveSub:'Jelajahi tanpa iklan dan pelacak'
+    ok:'OK', cancel:'Batal', cleared:'Berhasil dihapus!', braveTitle:'Pengalaman lebih baik dengan Brave', braveSub:'Jelajahi tanpa iklan dan pelacak',
+    mdlTitle:'Pasang StreamWipe', mdlSub:'Nikmati pengalaman menonton terbaik dengan aplikasi resmi kami.',
+    fAdBlock:'Tanpa Iklan & Pop-up Ilegal', fSmooth:'Streaming Lebih Lancar (60 FPS)', fSubs:'Bisa Upload Subtitle Sendiri', fData:'Hemat Kuota & Loading Cepat',
+    btnNative:'Download APK Native', btnWeb:'Pasang Lewat Browser'
   },
   ja: {
     home:'ホーム', movies:'映画', tv:'TVシリーズ', trending:'トレンド', toprated:'高評価', watchlist:'ウォッチリスト', settings:'設定',
@@ -3561,10 +3616,13 @@ const TRANSLATIONS = {
     stOpacity:'壁紙の透明度', stOpacityDesc:'背景画像の透明度',
     stLanguage:'言語', stLangNote:'言語を変更するとページが再読み込みされます。',
     stStorage:'ストレージ', stClearHistory:'検索履歴を削除', stClearWatchlist:'ウォッチリストを削除', stClearAll:'全データを削除',
-    stAbout:'について', stVersion:'バージョン 22.0 — TMDB API使用',
+    stAbout:'について', stVersion:'バージョン 27.0 — TMDB API使用',
     stAboutDesc:'WipeStreamはTMDBを利用した無料の映画・TVストリーミング発見アプリです。',
     confirmLang:'言語を変更するとページが再読み込みされます。続けますか？', confirmHistory:'検索履歴をすべて削除しますか？', confirmWatchlist:'ウォッチリストをすべて削除しますか？', confirmAllData:'すべてのWipeStreamデータを削除しますか？',
-    ok:'OK', cancel:'キャンセル', cleared:'削除しました！', braveTitle:'Braveでより良い体験を', braveSub:'広告なしで閲覧'
+    ok:'OK', cancel:'キャンセル', cleared:'削除しました！', braveTitle:'Braveでより良い体験を', braveSub:'広告なしで閲覧',
+    mdlTitle:'StreamWipeをインストール', mdlSub:'公式アプリで最高の体験をお楽しみください。',
+    fAdBlock:'広告とポップアップなし', fSmooth:'スムーズなストリーミング (60 FPS)', fSubs:'字幕のアップロードが可能', fData:'データ節約と高速読み込み',
+    btnNative:'APKをダウンロード', btnWeb:'ブラウザでインストール'
   },
   ko: {
     home:'홈', movies:'영화', tv:'TV 시리즈', trending:'트렌딩', toprated:'최고 평점', watchlist:'찜 목록', settings:'설정',
@@ -3576,10 +3634,13 @@ const TRANSLATIONS = {
     stOpacity:'배경화면 투명도', stOpacityDesc:'배경 이미지 투명도',
     stLanguage:'언어', stLangNote:'언어를 변경하면 페이지가 새로고침됩니다.',
     stStorage:'저장소 및 캐시', stClearHistory:'검색 기록 지우기', stClearWatchlist:'찜 목록 지우기', stClearAll:'모든 데이터 지우기',
-    stAbout:'정보', stVersion:'버전 22.0 — TMDB API 사용',
+    stAbout:'정보', stVersion:'버전 27.0 — TMDB API 사용',
     stAboutDesc:'WipeStream은 TMDB를 기반으로 한 무료 영화 및 TV 스트리밍 앱입니다.',
     confirmLang:'언어를 변경하면 페이지가 새로고침됩니다. 계속하시겠습니까?', confirmHistory:'모든 검색 기록을 지우시겠습니까?', confirmWatchlist:'찜 목록을 모두 지우시겠습니까?', confirmAllData:'모든 WipeStream 데이터를 삭제하시겠습니까?',
-    ok:'확인', cancel:'취소', cleared:'삭제되었습니다!', braveTitle:'Brave로 더 나은 경험을', braveSub:'광고 없이 탐색'
+    ok:'확인', cancel:'취소', cleared:'삭제되었습니다!', braveTitle:'Brave로 더 나은 경험을', braveSub:'광고 없이 탐색',
+    mdlTitle:'StreamWipe 설치', mdlSub:'공식 앱으로 최고의 경험을 즐기세요.',
+    fAdBlock:'광고 및 팝업 차단', fSmooth:'부드러운 스트리밍 (60 FPS)', fSubs:'자막 업로드 지원', fData:'데이터 절약 및 빠른 로딩',
+    btnNative:'APK 다운로드', btnWeb:'브라우저에서 설치'
   },
   zh: { home:'首页', movies:'电影', tv:'电视剧', trending:'热门', toprated:'高分', watchlist:'收藏', settings:'设置', watchNow:'立即观看', addWatchlist:'加入收藏', removeWatchlist:'删除', close:'关闭', trendingNow:'热门内容', popularMovies:'热门电影', topRatedLabel:'高分', searchPlaceholder:'搜索电影...', noResults:'无结果', watchlistEmpty:'收藏夹为空', settingsTitle:'设置', settingsSubtitle:'自定义您的WipeStream体验', stAppearance:'外观', stThemePresets:'主题预设', stFont:'字体', stFontDesc:'选择您喜欢的字体', stAccent:'强调色', stAccentDesc:'主要高亮颜色', stWallpaper:'背景图片URL', stWallpaperDesc:'应用背景壁纸', stOpacity:'壁纸透明度', stOpacityDesc:'背景图片透明度', stLanguage:'语言', stLangNote:'更改语言将重新加载页面。', stStorage:'存储与缓存', stClearHistory:'清除搜索历史', stClearWatchlist:'清除收藏', stClearAll:'清除所有数据', stAbout:'关于', stVersion:'版本 22.0 — 使用TMDB API', stAboutDesc:'WipeStream是一款基于TMDB的免费电影和电视流媒体发现应用。', confirmLang:'更改语言将重新加载页面。继续吗？', confirmHistory:'清除所有搜索历史？', confirmWatchlist:'清除所有收藏？', confirmAllData:'删除所有WipeStream数据？', ok:'确定', cancel:'取消', cleared:'已清除！', braveTitle:'使用Brave获得更好体验', braveSub:'无广告浏览' },
   es: { home:'Inicio', movies:'Películas', tv:'Series TV', trending:'Tendencias', toprated:'Mejor valoradas', watchlist:'Mi lista', settings:'Ajustes', watchNow:'Ver ahora', addWatchlist:'Añadir a lista', removeWatchlist:'Eliminar', close:'Cerrar', trendingNow:'En tendencia', popularMovies:'Películas populares', topRatedLabel:'Mejor valoradas', searchPlaceholder:'Buscar películas...', noResults:'Sin resultados', watchlistEmpty:'Tu lista está vacía', settingsTitle:'Ajustes', settingsSubtitle:'Personaliza tu experiencia WipeStream', stAppearance:'Apariencia', stThemePresets:'Temas', stFont:'Fuente', stFontDesc:'Elige tu fuente preferida', stAccent:'Color de acento', stAccentDesc:'Color de resaltado principal', stWallpaper:'URL de imagen de fondo', stWallpaperDesc:'Fondo personalizado', stOpacity:'Opacidad del fondo', stOpacityDesc:'Transparencia de la imagen de fondo', stLanguage:'Idioma', stLangNote:'Cambiar el idioma recargará la página.', stStorage:'Almacenamiento', stClearHistory:'Borrar historial', stClearWatchlist:'Borrar lista', stClearAll:'Borrar todo', stAbout:'Acerca de', stVersion:'Versión 22.0 — Con TMDB API', stAboutDesc:'WipeStream es una app gratuita de descubrimiento de streaming.', confirmLang:'Cambiar idioma recargará la página. ¿Continuar?', confirmHistory:'¿Borrar todo el historial?', confirmWatchlist:'¿Borrar toda la lista?', confirmAllData:'¿Borrar todos los datos?', ok:'OK', cancel:'Cancelar', cleared:'¡Borrado!', braveTitle:'Mejor experiencia con Brave', braveSub:'Navega sin anuncios' },
@@ -3597,8 +3658,15 @@ function t(key) {
 }
 
 function applyTranslations() {
-  const ids = ['settingsTitle','settingsSubtitle','stAppearance','stThemePresets','stFont','stFontDesc','stAccent','stAccentDesc','stWallpaper','stWallpaperDesc','stOpacity','stOpacityDesc','stLanguage','stLangNote','stStorage','stClearHistory','stClearWatchlist','stClearAll','stAbout','stVersion','stAboutDesc'];
+  const ids = ['settingsTitle','settingsSubtitle','stAppearance','stThemePresets','stFont','stFontDesc','stAccent','stAccentDesc','stWallpaper','stWallpaperDesc','stOpacity','stOpacityDesc','stLanguage','stLangNote','stStorage','stClearHistory','stClearWatchlist','stClearAll','stAbout','stVersion','stAboutDesc', 'mdlTitle', 'mdlSub', 'fAdBlock', 'fSmooth', 'fSubs', 'fData'];
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = t(id); });
+
+  // Translation for buttons in modal
+  const btnNative = document.querySelector('.app-modal-btn.primary span') || document.querySelector('.app-modal-btn.primary');
+  if (btnNative) btnNative.textContent = t('btnNative');
+  const btnWeb = document.getElementById('mdlPwaBtn');
+  if (btnWeb) btnWeb.textContent = t('btnWeb');
+
   const si = document.getElementById('searchInput');
   if (si) si.placeholder = t('searchPlaceholder');
   const bTitle = document.querySelector('.brave-title');
@@ -3697,7 +3765,44 @@ function showConfirm(msg, onOk) {
 }
 
 // ===== START =====
+function initWebApp() {
+  // Detect if running in Browser (Web) or App (WebView)
+  const isInApp = window.location.protocol === 'file:' || navigator.userAgent.includes('wv') || window.android;
+
+  if (!isInApp) {
+    // Show download modal EVERY TIME on Web
+    const modal = document.getElementById('appDownloadModal');
+    if (modal) {
+      setTimeout(() => { modal.style.display = 'flex'; }, 1000);
+    }
+
+    // Add Download button to Settings > About (Permanent)
+    const aboutSection = document.getElementById('acc-about').querySelector('.settings-section-body');
+    if (aboutSection) {
+      const dlBtn = document.createElement('a');
+      dlBtn.href = 'StreamWipe.apk';
+      dlBtn.download = 'StreamWipe.apk';
+      dlBtn.className = 'storage-btn';
+      dlBtn.style.marginTop = '12px';
+      dlBtn.style.borderColor = 'var(--accent)';
+      dlBtn.style.color = 'var(--accent)';
+      dlBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download StreamWipe APK (Native)`;
+      aboutSection.appendChild(dlBtn);
+    }
+  }
+}
+
+function dismissAppModal() {
+  const modal = document.getElementById('appDownloadModal');
+  if (modal) {
+    modal.style.animation = 'fadeOut 0.3s ease forwards';
+    setTimeout(() => { modal.style.display = 'none'; }, 300);
+  }
+  localStorage.setItem('wipestream_app_dismissed', '1');
+}
+
 init();
+initWebApp();
 </script>
 
 <!-- ===== PWA: Manifest + Service Worker + Install Prompt ===== -->
@@ -3758,11 +3863,16 @@ self.addEventListener('fetch', e => {
     // Show install button in Settings > About
     const btn = document.getElementById('pwaInstallBtn');
     if (btn) btn.style.display = 'flex';
+    // Show in modal too
+    const modalBtn = document.getElementById('mdlPwaBtn');
+    if (modalBtn) modalBtn.style.display = 'flex';
   });
   window.addEventListener('appinstalled', () => {
     deferredPrompt = null;
     const btn = document.getElementById('pwaInstallBtn');
     if (btn) btn.style.display = 'none';
+    const bannerBtn = document.getElementById('bannerInstallBtn');
+    if (bannerBtn) bannerBtn.style.display = 'none';
     if (typeof showToast === 'function') showToast('WipeStream installed!', 'success');
   });
   window.triggerPWAInstall = function() {
