@@ -33,9 +33,39 @@ button{cursor:pointer;border:none;background:none;color:inherit;font-family:inhe
 img{display:block}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:var(--bg2)}
-::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:3px;transition:background 0.2s}
 ::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 
+/* ===== PERFORMANCE: GPU ACCELERATION ===== */
+.hero-bg{will-change:opacity;transform:translateZ(0)}
+.hero-content{transform:translateZ(0)}
+.film-card{will-change:transform;transform:translateZ(0);contain:layout style paint}
+.film-card:hover{transform:translateY(-6px) scale(1.03) translateZ(0)}
+.genre-row{-webkit-overflow-scrolling:touch;transform:translateZ(0)}
+.detail-page{will-change:transform;transform:translateX(100%) translateZ(0)}
+.detail-page.open{transform:translateX(0) translateZ(0)}
+.actor-page{will-change:transform}
+.player-view{will-change:transform}
+.navbar{will-change:transform;transform:translateZ(0)}
+/* Smooth image rendering */
+img{image-rendering:auto;-webkit-backface-visibility:hidden;backface-visibility:hidden}
+/* Staggered card fade-in */
+@keyframes cardFadeIn{from{opacity:0;transform:translateY(16px) translateZ(0)}to{opacity:1;transform:translateY(0) translateZ(0)}}
+.film-card.animate-in{animation:cardFadeIn 0.35s cubic-bezier(0.4,0,0.2,1) both}
+/* Shimmer skeleton */
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skeleton{background:linear-gradient(90deg,var(--bg3) 25%,rgba(255,255,255,0.06) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shimmer 1.8s ease-in-out infinite}
+/* Smooth page transitions */
+.detail-page,.actor-page,.player-view{transition:transform 0.38s cubic-bezier(0.4,0,0.2,1)}
+/* Momentum scroll containers */
+.ep-list,.genre-row,.film-grid{-webkit-overflow-scrolling:touch}
+/* Custom thin scrollbar for episode list */
+.ep-list::-webkit-scrollbar{width:3px}
+.ep-list::-webkit-scrollbar-track{background:transparent}
+.ep-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+.ep-list::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+/* Contain layout for cards */
+.film-poster{contain:strict;overflow:hidden}
 /* ===== NAVBAR ===== */
 .navbar{position:fixed;top:0;left:0;right:0;z-index:1000;height:64px;display:flex;align-items:center;padding:0 24px;gap:24px;background:linear-gradient(to bottom,rgba(10,10,15,0.98),rgba(10,10,15,0.85));backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:var(--transition)}
 .nav-logo{display:flex;align-items:center;gap:10px;font-size:1.4rem;font-weight:800;letter-spacing:-0.5px;color:var(--accent);flex-shrink:0}
@@ -128,6 +158,7 @@ img{display:block}
 .card-badge-rating{position:absolute;top:7px;left:7px;z-index:6;display:flex;align-items:center;gap:3px;padding:3px 6px;border-radius:6px;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);font-size:0.68rem;font-weight:700;color:#f5c518;line-height:1;pointer-events:none}
 .card-badge-rating svg{width:9px;height:9px;flex-shrink:0}
 .card-badge-year{position:absolute;top:7px;right:38px;z-index:6;padding:3px 6px;border-radius:6px;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);font-size:0.68rem;font-weight:600;color:rgba(255,255,255,0.85);line-height:1;pointer-events:none}
+.card-badge-tv{position:absolute;bottom:7px;left:7px;z-index:6;padding:2px 6px;border-radius:4px;background:rgba(99,102,241,0.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);font-size:0.62rem;font-weight:700;color:#fff;letter-spacing:0.06em;line-height:1.4;pointer-events:none;text-transform:uppercase}
 .film-info{padding:8px 2px 0}
 .film-title{font-size:0.8rem;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--text)}
 .film-year{font-size:0.72rem;color:var(--text3);margin-top:3px}
@@ -210,6 +241,58 @@ img{display:block}
 .player-note svg{width:12px;height:12px;flex-shrink:0}
 /* Hide topbar/bottom on fullscreen */
 .player-view.hide-ui .player-view-topbar,.player-view.hide-ui .player-view-bottom{opacity:0;pointer-events:none}
+/* ===== TV PLAYER LAYOUT ===== */
+.player-tv-body{flex:1;display:flex;flex-direction:row;min-height:0;overflow:hidden}
+.player-tv-main{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;background:#000}
+.player-frame-cinema-tv{position:relative;width:100%;background:#000;flex:1;min-height:0}
+.player-frame-cinema-tv iframe{position:absolute;inset:0;width:100%;height:100%;border:none;display:block}
+/* Episode sidebar (desktop) */
+.ep-sidebar{width:340px;flex-shrink:0;background:rgba(10,10,18,0.97);border-left:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;overflow:hidden;transition:width 0.3s ease}
+.ep-sidebar.collapsed{width:0;overflow:hidden}
+.ep-sidebar-header{padding:12px 14px 8px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0}
+.ep-sidebar-title{font-size:0.78rem;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Season selector */
+.season-select{width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#fff;font-size:0.78rem;padding:7px 10px;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;background-size:14px;padding-right:28px}
+.season-select:focus{border-color:var(--accent)}
+/* Episode list */
+.ep-list{flex:1;overflow-y:auto;padding:8px 0}
+.ep-list::-webkit-scrollbar{width:4px}
+.ep-list::-webkit-scrollbar-track{background:transparent}
+.ep-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:2px}
+.ep-card{display:flex;gap:10px;padding:8px 12px;cursor:pointer;transition:background 0.15s;border-bottom:1px solid rgba(255,255,255,0.04)}
+.ep-card:hover{background:rgba(255,255,255,0.06)}
+.ep-card.active{background:rgba(245,197,24,0.1);border-left:3px solid var(--accent)}
+.ep-card.active .ep-num{color:var(--accent)}
+.ep-thumb{width:90px;height:52px;border-radius:6px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,0.06)}
+.ep-thumb-placeholder{width:90px;height:52px;border-radius:6px;flex-shrink:0;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center}
+.ep-thumb-placeholder svg{width:20px;height:20px;color:rgba(255,255,255,0.2)}
+.ep-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ep-num{font-size:0.65rem;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.05em}
+.ep-title{font-size:0.78rem;font-weight:600;color:rgba(255,255,255,0.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ep-meta{font-size:0.65rem;color:rgba(255,255,255,0.4);display:flex;gap:6px;align-items:center}
+.ep-overview{font-size:0.68rem;color:rgba(255,255,255,0.45);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:2px}
+.ep-loading{padding:20px;text-align:center;color:rgba(255,255,255,0.3);font-size:0.8rem}
+/* Toggle sidebar button */
+.ep-toggle-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:7px 10px;color:#fff;font-size:0.75rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.2s;flex-shrink:0}
+.ep-toggle-btn:hover{background:rgba(255,255,255,0.15)}
+.ep-toggle-btn svg{width:14px;height:14px;transition:transform 0.3s}
+.ep-sidebar.collapsed ~ * .ep-toggle-btn svg,.ep-toggle-btn.collapsed svg{transform:rotate(180deg)}
+/* Server tabs in player */
+.player-server-tabs{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.player-server-tab{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:5px 10px;color:rgba(255,255,255,0.7);font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.player-server-tab:hover{background:rgba(255,255,255,0.14);color:#fff}
+.player-server-tab.active{background:var(--accent);border-color:var(--accent);color:#000}
+/* Mobile episode panel (below player) */
+@media(max-width:768px){
+  .player-tv-body{flex-direction:column}
+  .ep-sidebar{width:100%;height:260px;border-left:none;border-top:1px solid rgba(255,255,255,0.07)}
+  .ep-sidebar.collapsed{height:0;width:100%}
+  .ep-list{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:8px}
+  .ep-card{flex-direction:column;min-width:130px;max-width:130px;border-bottom:none;border-right:1px solid rgba(255,255,255,0.04);padding:8px}
+  .ep-thumb{width:100%;height:70px}
+  .ep-thumb-placeholder{width:100%;height:70px}
+  .ep-overview{display:none}
+}
 
 /* ===== TRAILER ===== */
 .trailer-section{margin-bottom:32px}
@@ -722,7 +805,7 @@ img{display:block}
 
 <!-- DEDICATED PLAYER VIEW (cinema mode, separate from detail page) -->
 <div class="player-view" id="playerView">
-  <!-- Top bar: flex row, NOT absolute, does NOT overlap iframe -->
+  <!-- Top bar -->
   <div class="player-view-topbar" id="playerTopbar">
     <button class="player-view-back" onclick="closePlayer()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
@@ -730,23 +813,45 @@ img{display:block}
     </button>
     <span class="player-view-title" id="playerViewTitle"></span>
     <span class="player-view-type" id="playerViewType">Movie</span>
+    <!-- Episode toggle (TV only) -->
+    <button class="ep-toggle-btn" id="epToggleBtn" style="display:none" onclick="toggleEpSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+      Episodes
+    </button>
   </div>
 
-  <!-- Cinema iframe: flex:1, fills remaining space, NOT overlapped by anything -->
-  <div class="player-frame-cinema" id="playerFrameCinema">
-    <iframe id="playerFrame"
-      allowfullscreen
-      allow="autoplay; encrypted-media; fullscreen; picture-in-picture; web-share"
-      referrerpolicy="no-referrer"
-      scrolling="no">
-    </iframe>
+  <!-- Body: movie = just iframe; tv = iframe + episode sidebar -->
+  <div class="player-tv-body" id="playerTvBody">
+    <!-- Main player area -->
+    <div class="player-tv-main" id="playerTvMain">
+      <div class="player-frame-cinema-tv" id="playerFrameCinema">
+        <iframe id="playerFrame"
+          allowfullscreen
+          allow="autoplay; encrypted-media; fullscreen; picture-in-picture; web-share"
+          referrerpolicy="no-referrer"
+          scrolling="no">
+        </iframe>
+      </div>
+    </div>
+
+    <!-- Episode sidebar (TV only) -->
+    <div class="ep-sidebar" id="epSidebar" style="display:none">
+      <div class="ep-sidebar-header">
+        <div class="ep-sidebar-title" id="epSidebarTitle">Episodes</div>
+        <select class="season-select" id="seasonSelect" onchange="loadSeasonEpisodes(this.value)"></select>
+      </div>
+      <div class="ep-list" id="epList">
+        <div class="ep-loading">Select a season to load episodes</div>
+      </div>
+    </div>
   </div>
 
-  <!-- Bottom bar: flex row, NOT absolute, does NOT overlap iframe -->
+  <!-- Bottom bar -->
   <div class="player-view-bottom" id="playerBottom">
+    <div class="player-server-tabs" id="playerServerTabs"></div>
     <div class="player-note">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      Streaming via VidSrc.sbs &mdash; Use VPN if blocked in your region.
+      Streaming via VidSrc &mdash; Use VPN if blocked in your region.
     </div>
   </div>
 </div>
@@ -768,6 +873,12 @@ let heroTimer = null;
 let currentDetail = null;
 let currentDetailType = 'movie';
 let playerVisible = false;
+// ===== NAVIGATION STACK =====
+// Each entry: { type: 'detail'|'actor', zIndex: number, scrollTop: number }
+// Base z-index: detail=2000, actor=4000. Each nested layer adds 2000.
+const NAV_STACK = [];
+const NAV_Z_BASE = 2000;
+const NAV_Z_STEP = 2000;
 let currentServer = 0;
 let watchlist = JSON.parse(localStorage.getItem('wipestream_wl') || '[]');
 let moviePage = 1, tvPage = 1, trendingPage = 1, topratedPage = 1, searchPage = 1;
@@ -780,8 +891,38 @@ let tvGenreMap = {};
 const SERVERS = [
   {
     name: 'VidSrc.sbs',
-    movie: (id, imdb) => `https://vidsrc.sbs/embed/movie/${id}?autoplay=1`,
-    tv: (id, s, e, imdb) => `https://vidsrc.sbs/embed/tv/${id}/${s}/${e}?autoplay=1`
+    movie: (id) => `https://vidsrc.sbs/embed/movie/${id}/?autoplay=1`,
+    tv: (id, s, e) => `https://vidsrc.sbs/embed/tv/${id}/${s}/${e}/?autoplay=1`
+  },
+  {
+    name: 'VidLink',
+    movie: (id) => `https://vidlink.pro/movie/${id}?autoplay=true&title=true`,
+    tv: (id, s, e) => `https://vidlink.pro/tv/${id}/${s}/${e}?autoplay=true&title=true`
+  },
+  {
+    name: 'VidSrc.su',
+    movie: (id) => `https://vidsrc.su/embed/movie/${id}`,
+    tv: (id, s, e) => `https://vidsrc.su/embed/tv/${id}/${s}/${e}`
+  },
+  {
+    name: 'VidSrc.me',
+    movie: (id) => `https://vsembed.ru/embed/movie/${id}`,
+    tv: (id, s, e) => `https://vsembed.ru/embed/tv/${id}/${s}/${e}`
+  },
+  {
+    name: '2Embed',
+    movie: (id) => `https://www.2embed.cc/embed/${id}`,
+    tv: (id, s, e) => `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`
+  },
+  {
+    name: 'Videasy',
+    movie: (id) => `https://player.videasy.to/movie/${id}`,
+    tv: (id, s, e) => `https://player.videasy.to/tv/${id}/${s}/${e}`
+  },
+  {
+    name: 'MultiEmbed',
+    movie: (id) => `https://multiembed.mov/?video_id=${id}&tmdb=1`,
+    tv: (id, s, e) => `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`
   }
 ];
 
@@ -952,31 +1093,92 @@ const GENRES_HOME = [
   { id: 16, name: 'Animation' }, { id: 80, name: 'Crime' }
 ];
 
+// Special home rows (non-genre)
+const HOME_SPECIAL_ROWS = [
+  { id: 'trending-tv', name: 'Trending TV Series', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--accent)"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>' },
+  { id: 'popular-tv', name: 'Popular TV Series', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--accent)"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' },
+  { id: 'toprated-tv', name: 'Top Rated TV Series', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--accent)"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' },
+];
+
+function makeRowSection(rowId, name, icon) {
+  const section = document.createElement('div');
+  section.className = 'genre-section';
+  section.innerHTML = `
+    <div class="genre-header">
+      <div class="genre-title">${icon || '<div class="genre-title-dot"></div>'} ${name}</div>
+    </div>
+    <div class="genre-row-wrap">
+      <button class="genre-arrow genre-arrow-left" onclick="scrollRow('${rowId}',-1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="genre-row" id="${rowId}">
+        ${[...Array(8)].map(() => `<div class="skeleton-card"><div class="skeleton skeleton-poster"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>`).join('')}
+      </div>
+      <button class="genre-arrow genre-arrow-right" onclick="scrollRow('${rowId}',1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  `;
+  return section;
+}
+
 async function loadGenreRows() {
   const container = document.getElementById('genreRowsContainer');
   container.innerHTML = '';
-  for (const genre of GENRES_HOME) {
-    const section = document.createElement('div');
-    section.className = 'genre-section';
-    section.innerHTML = `
-      <div class="genre-header">
-        <div class="genre-title"><div class="genre-title-dot"></div>${genre.name}</div>
-      </div>
-      <div class="genre-row-wrap">
-        <button class="genre-arrow genre-arrow-left" onclick="scrollRow('row-${genre.id}',-1)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <div class="genre-row" id="row-${genre.id}">
-          ${[...Array(8)].map(() => `<div class="skeleton-card"><div class="skeleton skeleton-poster"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div></div>`).join('')}
-        </div>
-        <button class="genre-arrow genre-arrow-right" onclick="scrollRow('row-${genre.id}',1)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-      </div>
-    `;
+
+  // 1. Trending TV row (always load immediately — above fold)
+  for (const special of HOME_SPECIAL_ROWS) {
+    const section = makeRowSection(special.id, special.name, special.icon);
     container.appendChild(section);
-    loadGenreRow(genre.id);
   }
+  loadSpecialRow('trending-tv');
+  loadSpecialRow('popular-tv');
+  loadSpecialRow('toprated-tv');
+
+  // 2. Movie genre rows — lazy load via IntersectionObserver
+  for (const genre of GENRES_HOME) {
+    const section = makeRowSection(`row-${genre.id}`, genre.name, null);
+    container.appendChild(section);
+  }
+
+  // IntersectionObserver: load row only when it enters viewport
+  const rowObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const wrap = entry.target;
+      const row = wrap.querySelector('.genre-row');
+      if (!row || row.dataset.loaded) return;
+      row.dataset.loaded = '1';
+      const genreId = row.id.replace('row-', '');
+      loadGenreRow(genreId);
+      rowObserver.unobserve(wrap);
+    });
+  }, { rootMargin: '200px 0px' });
+
+  container.querySelectorAll('.genre-row-wrap').forEach(wrap => rowObserver.observe(wrap));
+}
+
+// Staggered fade-in for cards in a row
+function animateRowCards(row) {
+  const cards = row.querySelectorAll('.film-card');
+  cards.forEach((card, i) => {
+    card.style.animationDelay = `${i * 30}ms`;
+    card.classList.add('animate-in');
+  });
+}
+
+async function loadSpecialRow(rowId) {
+  let d;
+  if (rowId === 'trending-tv') d = await api('/trending/tv/week', { page: 1 });
+  else if (rowId === 'popular-tv') d = await api('/tv/popular', { page: 1 });
+  else if (rowId === 'toprated-tv') d = await api('/tv/top_rated', { page: 1 });
+  const row = document.getElementById(rowId);
+  if (!row) return;
+  row.innerHTML = (d.results || []).slice(0, 20).map(f => filmCardHTML(f, 'tv')).join('');
+  animateRowCards(row);
+  updateArrows(rowId);
+  row.addEventListener('scroll', () => updateArrows(rowId));
+  initRowDrag(row);
 }
 
 async function loadGenreRow(genreId) {
@@ -984,6 +1186,7 @@ async function loadGenreRow(genreId) {
   const row = document.getElementById(`row-${genreId}`);
   if (!row) return;
   row.innerHTML = d.results.slice(0, 20).map(f => filmCardHTML(f, 'movie')).join('');
+  animateRowCards(row);
   updateArrows(`row-${genreId}`);
   row.addEventListener('scroll', () => updateArrows(`row-${genreId}`));
   initRowDrag(row);
@@ -1005,19 +1208,39 @@ function updateArrows(rowId) {
   if (rightBtn) rightBtn.classList.toggle('hidden', row.scrollLeft + row.clientWidth >= row.scrollWidth - 10);
 }
 
-// ===== ROW DRAG-TO-SCROLL (desktop mouse) =====
+// ===== ROW DRAG-TO-SCROLL with RAF + Momentum Inertia =====
 function initRowDrag(row) {
+  if (row._dragInit) return; // prevent double-init
+  row._dragInit = true;
+
   let isDown = false, startX = 0, scrollLeft = 0, moved = false;
+  let velX = 0, lastX = 0, lastTime = 0, rafId = null;
   const DRAG_THRESHOLD = 5;
+  const FRICTION = 0.92; // momentum deceleration factor
 
   row.style.cursor = 'grab';
 
+  function cancelMomentum() {
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  }
+
+  function applyMomentum() {
+    if (Math.abs(velX) < 0.5) { rafId = null; return; }
+    row.scrollLeft += velX;
+    velX *= FRICTION;
+    rafId = requestAnimationFrame(applyMomentum);
+  }
+
   row.addEventListener('mousedown', (e) => {
     if (e.button !== 0) return;
+    cancelMomentum();
     isDown = true;
     moved = false;
     startX = e.pageX - row.offsetLeft;
     scrollLeft = row.scrollLeft;
+    lastX = e.pageX;
+    lastTime = performance.now();
+    velX = 0;
     row.style.cursor = 'grabbing';
     row.style.userSelect = 'none';
     e.preventDefault();
@@ -1028,10 +1251,11 @@ function initRowDrag(row) {
     isDown = false;
     row.style.cursor = 'grab';
     row.style.userSelect = '';
-    // After drag ends, briefly mark row as "just-dragged" to suppress click
     if (moved) {
       row.dataset.dragged = '1';
-      setTimeout(() => { delete row.dataset.dragged; }, 200);
+      setTimeout(() => { delete row.dataset.dragged; }, 250);
+      // Launch momentum
+      rafId = requestAnimationFrame(applyMomentum);
     }
   });
 
@@ -1041,6 +1265,11 @@ function initRowDrag(row) {
     const walk = x - startX;
     if (Math.abs(walk) > DRAG_THRESHOLD) moved = true;
     if (moved) {
+      const now = performance.now();
+      const dt = now - lastTime || 16;
+      velX = (lastX - e.pageX) / dt * 16; // pixels per frame at 60fps
+      lastX = e.pageX;
+      lastTime = now;
       row.scrollLeft = scrollLeft - walk;
       e.preventDefault();
     }
@@ -1054,8 +1283,8 @@ function initRowDrag(row) {
     }
   }, true);
 
-  // Touch scroll already works natively — just ensure cursor resets
-  row.addEventListener('touchstart', () => { moved = false; }, { passive: true });
+  // Touch: cancel momentum on touch start
+  row.addEventListener('touchstart', () => { cancelMomentum(); moved = false; }, { passive: true });
 }
 
 // ===== FILM CARD =====
@@ -1092,9 +1321,10 @@ function filmCardHTML(f, type) {
   return `
     <div class="film-card" onclick="openDetail(${id},'${type}',false)">
       <div class="film-poster">
-        <img src="${poster}" alt="${title}" loading="lazy" onerror="imgFallback(this)">
+        <img src="${poster}" alt="${title}" loading="lazy" decoding="async" onerror="imgFallback(this)">
         ${rating ? `<div class="card-badge-rating"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>${rating}</div>` : ''}
         ${year ? `<div class="card-badge-year">${year}</div>` : ''}
+        ${type === 'tv' ? `<div class="card-badge-tv">TV</div>` : ''}
         <div class="film-card-overlay">
           <div class="film-card-play"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
         </div>
@@ -1178,7 +1408,17 @@ function renderWatchlist() {
 
 // ===== DETAIL PAGE =====
 async function openDetail(id, type, autoPlay) {
-  document.getElementById('detailPage').classList.add('open');
+  const detailEl = document.getElementById('detailPage');
+
+  // Compute z-index: always above whatever is currently on top of the stack
+  const topZ = NAV_STACK.length > 0 ? NAV_STACK[NAV_STACK.length - 1].zIndex : 0;
+  const myZ   = Math.max(topZ + NAV_Z_STEP, NAV_Z_BASE);
+  detailEl.style.zIndex = String(myZ);
+
+  // Push this layer onto the navigation stack
+  NAV_STACK.push({ type: 'detail', zIndex: myZ });
+
+  detailEl.classList.add('open');
   document.body.style.overflow = 'hidden';
   playerVisible = false;
   // Close player view if open from previous film
@@ -1307,6 +1547,13 @@ async function openDetail(id, type, autoPlay) {
     { label: 'Release Date', value: fmt(detail.release_date || detail.first_air_date) },
     { label: 'Status', value: detail.status },
     { label: 'Runtime', value: detail.runtime ? `${detail.runtime} min` : (detail.episode_run_time?.[0] ? `${detail.episode_run_time[0]} min/ep` : null) },
+    // TV-specific fields
+    { label: 'Seasons', value: detail.number_of_seasons ? `${detail.number_of_seasons} Season${detail.number_of_seasons > 1 ? 's' : ''}` : null },
+    { label: 'Episodes', value: detail.number_of_episodes ? `${detail.number_of_episodes} Episodes` : null },
+    { label: 'Network', value: (detail.networks||[]).map(n=>n.name).join(', ') || null },
+    { label: 'Created By', value: (detail.created_by||[]).map(c=>c.name).join(', ') || null },
+    { label: 'Last Air Date', value: fmt(detail.last_air_date) },
+    // Movie-specific fields
     { label: 'Budget', value: fmtMoney(detail.budget) },
     { label: 'Revenue', value: fmtMoney(detail.revenue) },
     { label: 'Production Companies', value: (detail.production_companies||[]).map(c=>c.name).join(', ') || null },
@@ -1378,8 +1625,23 @@ function closeDetail() {
     pv.classList.remove('open');
     document.getElementById('playerFrame').src = '';
   }
-  document.getElementById('detailPage').classList.remove('open');
-  document.body.style.overflow = '';
+
+  const detailEl = document.getElementById('detailPage');
+  detailEl.classList.remove('open');
+  detailEl.style.zIndex = '';
+
+  // Pop this layer from the navigation stack
+  // Find and remove the topmost 'detail' entry
+  for (let i = NAV_STACK.length - 1; i >= 0; i--) {
+    if (NAV_STACK[i].type === 'detail') { NAV_STACK.splice(i, 1); break; }
+  }
+
+  // If there's still something on the stack (actor page below), keep body scroll hidden
+  // Otherwise restore scroll
+  if (NAV_STACK.length === 0) {
+    document.body.style.overflow = '';
+  }
+
   document.getElementById('trailerFrame').src = '';
   document.getElementById('trailerFrame').style.display = 'block';
   document.getElementById('trailerFallback').style.display = 'none';
@@ -1388,18 +1650,42 @@ function closeDetail() {
 }
 
 // ===== PLAYER =====
-// Single server: VidSrc.sbs — no tabs needed
+let currentServerIdx = 0;
+let currentSeason = 1;
+let currentEpisode = 1;
+let tvSeasons = []; // array of season objects from TMDB
 
-async function loadVidSrc(id, type) {
+function buildServerTabs(id, type) {
+  if (currentDetail) {
+    document.getElementById('playerViewTitle').textContent = currentDetail.title || currentDetail.name || '';
+    document.getElementById('playerViewType').textContent = type === 'tv' ? 'TV Series' : 'Movie';
+  }
+  const tabs = document.getElementById('playerServerTabs');
+  tabs.innerHTML = SERVERS.map((s, i) => `
+    <button class="player-server-tab ${i === currentServerIdx ? 'active' : ''}"
+      onclick="selectServer(${i},${id},'${type}')">
+      ${s.name}
+    </button>
+  `).join('');
+}
+
+function getStreamUrl(id, type, serverIdx, season, episode) {
+  const s = SERVERS[serverIdx] || SERVERS[0];
+  return type === 'movie' ? s.movie(id) : s.tv(id, season, episode);
+}
+
+async function loadStream(id, type, serverIdx, season, episode) {
   const frame = document.getElementById('playerFrame');
   frame.src = '';
-  frame.style.opacity = '0.5';
-  const server = SERVERS[0];
-  const url = type === 'movie'
-    ? server.movie(id)
-    : server.tv(id, 1, 1);
+  const url = getStreamUrl(id, type, serverIdx, season, episode);
   frame.src = url;
-  frame.style.opacity = '1';
+}
+
+async function selectServer(idx, id, type) {
+  currentServerIdx = idx;
+  // Update tab active state
+  document.querySelectorAll('.player-server-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  await loadStream(id, type, idx, currentSeason, currentEpisode);
 }
 
 // Open dedicated player view (cinema mode)
@@ -1408,16 +1694,38 @@ async function openPlayer() {
   const { id, type } = currentDetail;
   const pv = document.getElementById('playerView');
 
+  currentServerIdx = 0;
+  currentSeason = 1;
+  currentEpisode = 1;
+  tvSeasons = [];
+
   // Update title/type in topbar
   document.getElementById('playerViewTitle').textContent = currentDetail.title || currentDetail.name || '';
   document.getElementById('playerViewType').textContent = type === 'tv' ? 'TV Series' : 'Movie';
+
+  // Show/hide episode sidebar for TV
+  const epSidebar = document.getElementById('epSidebar');
+  const epToggleBtn = document.getElementById('epToggleBtn');
+  if (type === 'tv') {
+    epSidebar.style.display = 'flex';
+    epToggleBtn.style.display = 'flex';
+    epSidebar.classList.remove('collapsed');
+    document.getElementById('epSidebarTitle').textContent = currentDetail.title || currentDetail.name || 'Episodes';
+    await loadTVSeasons(id);
+  } else {
+    epSidebar.style.display = 'none';
+    epToggleBtn.style.display = 'none';
+  }
+
+  // Build server tabs
+  buildServerTabs(id, type);
 
   // Open player view (slides up from bottom)
   pv.classList.add('open');
   document.body.style.overflow = 'hidden';
 
-  // Load VidSrc.sbs directly
-  await loadVidSrc(id, type);
+  // Load stream
+  await loadStream(id, type, 0, currentSeason, currentEpisode);
 }
 
 // Close dedicated player view
@@ -1425,39 +1733,137 @@ function closePlayer() {
   const pv = document.getElementById('playerView');
   pv.classList.remove('open');
   document.getElementById('playerFrame').src = '';
-  // Restore body scroll (detail page is still open)
   document.body.style.overflow = 'hidden';
 }
 
-// Legacy togglePlayer — now opens dedicated player view
+// Legacy togglePlayer
 async function togglePlayer() {
   await openPlayer();
 }
 
-// Legacy selectServer — kept for compatibility, redirects to loadVidSrc
-async function selectServer(idx, id, type) {
-  await loadVidSrc(id, type);
+// Toggle episode sidebar
+function toggleEpSidebar() {
+  const sidebar = document.getElementById('epSidebar');
+  sidebar.classList.toggle('collapsed');
 }
 
-// Legacy buildServerTabs — no-op since single server
-function buildServerTabs(id, type) {
-  if (currentDetail) {
-    document.getElementById('playerViewTitle').textContent = currentDetail.title || currentDetail.name || '';
-    document.getElementById('playerViewType').textContent = type === 'tv' ? 'TV Series' : 'Movie';
+// ===== TV SEASON & EPISODE =====
+async function loadTVSeasons(tvId) {
+  const detail = currentDetail;
+  if (!detail) return;
+  const seasons = (detail.seasons || []).filter(s => s.season_number > 0);
+  tvSeasons = seasons;
+
+  const sel = document.getElementById('seasonSelect');
+  sel.innerHTML = seasons.map(s =>
+    `<option value="${s.season_number}">Season ${s.season_number}${s.name && s.name !== `Season ${s.season_number}` ? ' — ' + s.name : ''} (${s.episode_count} eps)</option>`
+  ).join('');
+
+  if (seasons.length > 0) {
+    currentSeason = seasons[0].season_number;
+    sel.value = currentSeason;
+    await loadSeasonEpisodes(currentSeason);
   }
+}
+
+async function loadSeasonEpisodes(seasonNum) {
+  if (!currentDetail) return;
+  const tvId = currentDetail.id;
+  currentSeason = Number(seasonNum);
+  currentEpisode = 1;
+
+  const epList = document.getElementById('epList');
+  epList.innerHTML = '<div class="ep-loading">Loading episodes...</div>';
+
+  try {
+    const data = await api(`/tv/${tvId}/season/${seasonNum}`);
+    const episodes = data.episodes || [];
+    if (episodes.length === 0) {
+      epList.innerHTML = '<div class="ep-loading">No episodes found</div>';
+      return;
+    }
+    epList.innerHTML = episodes.map(ep => {
+      const thumb = ep.still_path ? `${IMG}w300${ep.still_path}` : null;
+      const runtime = ep.runtime ? `${ep.runtime} min` : '';
+      const airDate = ep.air_date ? new Date(ep.air_date).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) : '';
+      const overview = (ep.overview || '').slice(0, 120) + ((ep.overview||'').length > 120 ? '...' : '');
+      const isActive = ep.episode_number === currentEpisode;
+      return `
+        <div class="ep-card ${isActive ? 'active' : ''}" id="ep-card-${ep.episode_number}"
+          onclick="playEpisode(${ep.episode_number})">
+          ${thumb
+            ? `<img class="ep-thumb" src="${thumb}" alt="E${ep.episode_number}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+            : ''}
+          <div class="ep-thumb-placeholder" style="${thumb ? 'display:none' : ''}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </div>
+          <div class="ep-info">
+            <div class="ep-num">E${String(ep.episode_number).padStart(2,'0')}</div>
+            <div class="ep-title">${ep.name || `Episode ${ep.episode_number}`}</div>
+            <div class="ep-meta">
+              ${runtime ? `<span>${runtime}</span>` : ''}
+              ${airDate ? `<span>${airDate}</span>` : ''}
+            </div>
+            ${overview ? `<div class="ep-overview">${overview}</div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Scroll to active episode
+    const activeCard = document.getElementById(`ep-card-${currentEpisode}`);
+    if (activeCard) activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Init drag scroll on episode list
+    initRowDrag(epList);
+  } catch(e) {
+    epList.innerHTML = '<div class="ep-loading">Failed to load episodes</div>';
+  }
+}
+
+async function playEpisode(epNum) {
+  if (!currentDetail) return;
+  const { id, type } = currentDetail;
+  currentEpisode = epNum;
+
+  // Update active state
+  document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
+  const card = document.getElementById(`ep-card-${epNum}`);
+  if (card) {
+    card.classList.add('active');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // Update player title
+  document.getElementById('playerViewTitle').textContent =
+    `${currentDetail.title || currentDetail.name || ''} — S${String(currentSeason).padStart(2,'0')}E${String(epNum).padStart(2,'0')}`;
+
+  // Load stream
+  await loadStream(id, type, currentServerIdx, currentSeason, epNum);
 }
 
 // ===== ACTOR PAGE =====
 async function openActor(actorId) {
-  document.getElementById('actorPage').classList.add('open');
+  const actorEl = document.getElementById('actorPage');
+
+  // Compute z-index: always above whatever is currently on top of the stack
+  const topZ = NAV_STACK.length > 0 ? NAV_STACK[NAV_STACK.length - 1].zIndex : 0;
+  const myZ   = Math.max(topZ + NAV_Z_STEP, 4000);
+  actorEl.style.zIndex = String(myZ);
+
+  // Push this layer onto the navigation stack
+  NAV_STACK.push({ type: 'actor', zIndex: myZ });
+
+  actorEl.classList.add('open');
   document.getElementById('actorName').textContent = 'Loading...';
   document.getElementById('actorBio').textContent = '';
   document.getElementById('actorBorn').innerHTML = '';
   document.getElementById('actorFilmGrid').innerHTML = '';
 
-  const [person, credits] = await Promise.all([
+  const [person, movieCredits, tvCredits] = await Promise.all([
     api(`/person/${actorId}`),
-    api(`/person/${actorId}/movie_credits`)
+    api(`/person/${actorId}/movie_credits`),
+    api(`/person/${actorId}/tv_credits`)
   ]);
 
   document.getElementById('actorPhoto').src = person.profile_path ? `${IMG}w342${person.profile_path}` : 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="342" height="342"><rect fill="%231a1a24" width="342" height="342"/><circle cx="171" cy="130" r="80" fill="%235a5a72"/><ellipse cx="171" cy="300" rx="120" ry="80" fill="%235a5a72"/></svg>';
@@ -1470,14 +1876,31 @@ async function openActor(actorId) {
   document.getElementById('actorBio').textContent = bio;
   document.getElementById('actorBioToggle').style.display = bio.length > 300 ? 'inline-block' : 'none';
 
-  const films = (credits.cast || []).sort((a, b) => (b.popularity || 0) - (a.popularity || 0)).slice(0, 40);
-  document.getElementById('actorFilmGrid').innerHTML = films.map(f => filmCardHTML(f, 'movie')).join('');
+  // Combine movie + TV credits, deduplicate by id+type, sort by popularity
+  const movieItems = (movieCredits.cast || []).map(f => ({ ...f, _type: 'movie' }));
+  const tvItems = (tvCredits.cast || []).map(f => ({ ...f, _type: 'tv' }));
+  const allItems = [...movieItems, ...tvItems]
+    .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+    .slice(0, 50);
+  document.getElementById('actorFilmGrid').innerHTML = allItems.map(f => filmCardHTML(f, f._type || 'movie')).join('');
 
   document.getElementById('actorPage').scrollTop = 0;
 }
 
 function closeActor() {
-  document.getElementById('actorPage').classList.remove('open');
+  const actorEl = document.getElementById('actorPage');
+  actorEl.classList.remove('open');
+  actorEl.style.zIndex = '';
+
+  // Pop the topmost 'actor' entry from the navigation stack
+  for (let i = NAV_STACK.length - 1; i >= 0; i--) {
+    if (NAV_STACK[i].type === 'actor') { NAV_STACK.splice(i, 1); break; }
+  }
+
+  // If nothing left on stack, restore body scroll
+  if (NAV_STACK.length === 0) {
+    document.body.style.overflow = '';
+  }
 }
 
 function toggleActorBio() {
@@ -1619,9 +2042,17 @@ document.addEventListener('keydown', e => {
     document.getElementById('searchInput').focus();
   }
   if (e.key === 'Escape') {
-    if (document.getElementById('actorPage').classList.contains('open')) closeActor();
-    else if (document.getElementById('playerView').classList.contains('open')) closePlayer();
-    else if (document.getElementById('detailPage').classList.contains('open')) closeDetail();
+    // Always close player first (it's a special overlay above everything)
+    if (document.getElementById('playerView').classList.contains('open')) {
+      closePlayer();
+      return;
+    }
+    // Then pop the topmost layer from the navigation stack
+    if (NAV_STACK.length > 0) {
+      const top = NAV_STACK[NAV_STACK.length - 1];
+      if (top.type === 'detail') closeDetail();
+      else if (top.type === 'actor') closeActor();
+    }
   }
 });
 
