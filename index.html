@@ -451,7 +451,40 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
 
 /* ===== PLAYER ===== */
 /* ===== DEDICATED PLAYER VIEW ===== */
-.player-view{position:fixed;inset:0;z-index:2000;background:#000;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);overflow:hidden}
+.player-view{position:fixed;inset:0;z-index:2000;background:#000;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);overflow:visible}
+/* FULLSCREEN FIX: allow iframe fullscreen to escape container */
+.player-view:-webkit-full-screen{overflow:visible}
+.player-view:-moz-full-screen{overflow:visible}
+.player-view:fullscreen{overflow:visible}
+.player-frame-cinema-tv:-webkit-full-screen{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:99999!important}
+.player-frame-cinema-tv:-moz-full-screen{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:99999!important}
+.player-frame-cinema-tv:fullscreen{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:99999!important}
+#playerFrame:-webkit-full-screen{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:99999!important;border:none!important}
+#playerFrame:-moz-full-screen{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:99999!important;border:none!important}
+#playerFrame:fullscreen{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:99999!important;border:none!important}
+/* Custom fullscreen button */
+.fs-btn{position:absolute;bottom:10px;right:10px;z-index:9999;width:40px;height:40px;border-radius:8px;background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.22);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;opacity:0;pointer-events:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.player-frame-cinema-tv:hover .fs-btn{opacity:1;pointer-events:auto}
+/* Always show on touch devices */
+@media (hover:none),(pointer:coarse){.fs-btn{opacity:1!important;pointer-events:auto!important}}
+.fs-btn:hover,.fs-btn:active{background:rgba(255,255,255,0.22);border-color:rgba(255,255,255,0.45);transform:scale(1.08)}
+.fs-btn svg{width:18px;height:18px}
+/* ::backdrop for native fullscreen */
+#playerFrame::backdrop{background:#000}
+.player-frame-cinema-tv::backdrop{background:#000}
+/* iOS pseudo-fullscreen: cover entire viewport, hide all other UI */
+body.ios-pseudo-fs .player-view{z-index:99999!important}
+body.ios-pseudo-fs .player-view-topbar,
+body.ios-pseudo-fs .player-view-bottom{opacity:0!important;pointer-events:none!important;transition:opacity 0.3s}
+body.ios-pseudo-fs #playerFrameCinema,
+body.ios-pseudo-fs .player-frame-cinema-tv{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:99998!important;background:#000!important}
+body.ios-pseudo-fs #playerFrame{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:99999!important;border:none!important}
+body.ios-pseudo-fs .fs-btn{position:fixed!important;bottom:16px!important;right:16px!important;z-index:100000!important;opacity:1!important;pointer-events:auto!important;background:rgba(0,0,0,0.8)!important}
+/* Tap to show/hide topbar in pseudo-fs */
+body.ios-pseudo-fs.show-ui .player-view-topbar,
+body.ios-pseudo-fs.show-ui .player-view-bottom{opacity:1!important;pointer-events:auto!important;z-index:100001!important;position:fixed!important;width:100%!important}
+body.ios-pseudo-fs.show-ui .player-view-topbar{top:0!important}
+body.ios-pseudo-fs.show-ui .player-view-bottom{bottom:0!important}
 .player-view.open{transform:translateY(0)}
 .player-view-topbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:rgba(0,0,0,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;min-height:52px}
 /* FIX BUG 2: Player back button - no tap delay, larger touch area */
@@ -532,6 +565,8 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
 .srv-status-dot.checking{background:rgba(255,255,255,0.25);animation:srv-pulse 1s ease-in-out infinite}
 @keyframes srv-pulse{0%,100%{opacity:0.3}50%{opacity:1}}
 .server-dropdown-label{font-size:0.62rem;font-weight:700;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:0.08em;padding:6px 12px 4px}
+.srv-default-badge{font-size:0.58rem;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--accent);color:#000;text-transform:uppercase;letter-spacing:0.06em;margin-left:auto;flex-shrink:0}
+.server-dropdown-item.viduki-default{border-left:2px solid var(--accent);padding-left:10px}
 /* Player bottom bar layout */
 .player-server-tabs{display:flex;align-items:center;gap:8px}
 /* Mobile episode panel (below player) */
@@ -666,24 +701,10 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
 .bottom-nav-item.active{color:var(--accent)}
 .bottom-nav-item svg{width:22px;height:22px}
 
-/* ===== APP DOWNLOAD MODAL (Web Only) ===== */
-.app-modal-overlay{position:fixed;inset:0;z-index:11000;background:rgba(0,0,0,0.85);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:24px;animation:fadeIn 0.3s ease}
-.app-modal{background:var(--bg3);border:1px solid var(--border);border-radius:24px;width:100%;max-width:400px;padding:32px 24px;text-align:center;box-shadow:var(--shadow);position:relative;animation:modalUp 0.4s cubic-bezier(0.4,0,0.2,1)}
-.app-modal-icon{width:80px;height:80px;background:var(--accent);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;color:#000;box-shadow:0 10px 30px rgba(245,197,24,0.3)}
-.app-modal-title{font-size:1.5rem;font-weight:900;margin-bottom:8px;color:var(--text)}
-.app-modal-sub{font-size:0.9rem;color:var(--text2);margin-bottom:24px;line-height:1.5}
-.app-modal-features{text-align:left;background:rgba(255,255,255,0.03);border-radius:16px;padding:16px;margin-bottom:28px;display:flex;flex-direction:column;gap:12px}
+/* ===== APP DOWNLOAD MODAL removed ===== */
 .app-feature{display:flex;align-items:center;gap:10px;font-size:0.85rem;color:var(--text);font-weight:600}
 .app-feature svg{width:18px;height:18px;color:var(--accent)}
-.app-modal-actions{display:flex;flex-direction:column;gap:12px}
-.app-modal-btn{padding:14px;border-radius:14px;font-size:0.95rem;font-weight:700;text-decoration:none;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:8px}
-.app-modal-btn.primary{background:var(--accent);color:#000}
-.app-modal-btn.primary:hover{background:var(--accent2);transform:scale(1.02)}
-.app-modal-btn.secondary{background:var(--glass);color:var(--text);border:1px solid var(--border)}
-.app-modal-btn.secondary:hover{background:var(--glass2)}
-.app-modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:var(--transition)}
-.app-modal-close:hover{background:var(--glass);color:var(--text)}
-@keyframes modalUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 /* Brave Banner */
 #braveBanner{position:fixed;bottom:0;left:0;right:0;z-index:8888;display:flex;align-items:center;gap:12px;padding:12px 20px;background:rgba(18,18,24,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(255,165,0,0.25);box-shadow:0 -4px 24px rgba(0,0,0,0.4);animation:braveSlideUp 0.4s cubic-bezier(0.4,0,0.2,1) forwards}
@@ -1394,6 +1415,10 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
       Episodes
     </button>
+    <!-- Fullscreen button in topbar -->
+    <button class="player-view-back" id="fsTopbarBtn" title="Fullscreen (F)" onclick="triggerIframeFullscreen()" style="padding:10px 12px;min-width:44px;justify-content:center;">
+      <svg id="fsTopbarIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+    </button>
   </div>
 
   <!-- Body: movie = just iframe; tv = iframe + episode sidebar -->
@@ -1403,10 +1428,13 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
       <div class="player-frame-cinema-tv" id="playerFrameCinema">
         <iframe id="playerFrame"
           allowfullscreen
-          allow="autoplay; encrypted-media; fullscreen; picture-in-picture; web-share"
+          webkitallowfullscreen
+          mozallowfullscreen
+          allow="autoplay; encrypted-media; fullscreen; picture-in-picture; web-share; xr-spatial-tracking"
           referrerpolicy="no-referrer"
           scrolling="no">
         </iframe>
+        <!-- fsBtnCustom removed: duplicate with iframe's own fullscreen button. Use fsTopbarBtn in topbar instead. -->
       </div>
     </div>
 
@@ -1437,48 +1465,7 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
 <!-- TOAST CONTAINER -->
 <div class="toast-container" id="toastContainer"></div>
 
-<!-- APP DOWNLOAD MODAL (Visible on Web) -->
-<div class="app-modal-overlay" id="appDownloadModal">
-  <div class="app-modal">
-    <button class="app-modal-close" onclick="dismissAppModal()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-    <div class="app-modal-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="40" height="40"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    </div>
-    <h2 class="app-modal-title" id="mdlTitle">Pasang StreamWipe</h2>
-    <p class="app-modal-sub" id="mdlSub">Nikmati pengalaman menonton terbaik dengan aplikasi resmi kami.</p>
-
-    <div class="app-modal-features">
-      <div class="app-feature">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        <span id="fAdBlock">Tanpa Iklan & Pop-up Ilegal</span>
-      </div>
-      <div class="app-feature">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        <span id="fSmooth">Streaming Lebih Lancar (60 FPS)</span>
-      </div>
-      <div class="app-feature">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        <span id="fSubs">Bisa Upload Subtitle Sendiri</span>
-      </div>
-      <div class="app-feature">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-        <span id="fData">Hemat Kuota & Loading Cepat</span>
-      </div>
-    </div>
-
-    <div class="app-modal-actions">
-      <a class="app-modal-btn primary" href="StreamWipe.apk" download="StreamWipe.apk" onclick="dismissAppModal()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download APK Native
-      </a>
-      <button class="app-modal-btn secondary" id="mdlPwaBtn" onclick="triggerPWAInstall(); dismissAppModal();" style="display:none">
-        Pasang Lewat Browser
-      </button>
-    </div>
-  </div>
-</div>
+<!-- APP DOWNLOAD MODAL removed -->
 
 <!-- BRAVE BROWSER BANNER -->
 <div id="braveBanner" style="display:none">
@@ -1486,8 +1473,8 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"/><path d="M9 12l2 2 4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </div>
   <div class="brave-text">
-    <span class="brave-title">Better experience with Brave</span>
-    <span class="brave-sub">Use Brave browser for ad-free streaming and faster performance</span>
+    <span class="brave-title">For the best experience, use <a href="https://brave.com/download" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-weight:700">Brave Browser</a> or install <a href="https://chromewebstore.google.com/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-weight:700">uBlock Origin</a> to block ads.</span>
+    <span class="brave-sub">Brave Browser or uBlock Origin extension — block ads &amp; trackers for smoother streaming</span>
   </div>
   <a class="brave-cta" href="https://brave.com/download" target="_blank" rel="noopener">Get Brave</a>
   <button class="brave-close" onclick="braveDismiss()" aria-label="Close">
@@ -1526,10 +1513,11 @@ let tvGenreMap = {};
 
 const SERVERS = [
   {
-    name: 'VidSrc.sbs',
+    name: 'Mapple 4K',
     status: 'green',
-    movie: (id) => `https://vidsrc.sbs/embed/movie/${id}/?autoplay=1`,
-    tv: (id, s, e) => `https://vidsrc.sbs/embed/tv/${id}/${s}/${e}/?autoplay=1`
+    isDefault: true,
+    movie: (id) => `https://mapplee.com/embed/movie/${id}`,
+    tv: (id, s, e) => `https://mapplee.com/embed/tv/${id}/${s}/${e}`
   },
   {
     name: 'VidSrc.me',
@@ -1538,22 +1526,22 @@ const SERVERS = [
     tv: (id, s, e) => `https://vidsrcme.ru/embed/tv/${id}/${s}/${e}`
   },
   {
-    name: 'VSEmbed',
+    name: 'VidFast',
     status: 'green',
-    movie: (id) => `https://vsembed.ru/embed/movie/${id}`,
-    tv: (id, s, e) => `https://vsembed.ru/embed/tv/${id}/${s}/${e}`
+    movie: (id) => `https://vidfast.vc/movie/${id}`,
+    tv: (id, s, e) => `https://vidfast.vc/tv/${id}/${s}/${e}`
+  },
+  {
+    name: 'VidSrc.sbs',
+    status: 'green',
+    movie: (id) => `https://vidsrc.sbs/embed/movie/${id}`,
+    tv: (id, s, e) => `https://vidsrc.sbs/embed/tv/${id}/${s}/${e}`
   },
   {
     name: 'VidLink',
     status: 'green',
-    movie: (id) => `https://vidlink.pro/movie/${id}?autoplay=true&title=true`,
-    tv: (id, s, e) => `https://vidlink.pro/tv/${id}/${s}/${e}?autoplay=true&title=true`
-  },
-  {
-    name: '2Embed',
-    status: 'green',
-    movie: (id) => `https://www.2embed.cc/embed/${id}`,
-    tv: (id, s, e) => `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`
+    movie: (id) => `https://vidlink.pro/movie/${id}`,
+    tv: (id, s, e) => `https://vidlink.pro/tv/${id}/${s}/${e}`
   },
   {
     name: 'Videasy',
@@ -1562,22 +1550,22 @@ const SERVERS = [
     tv: (id, s, e) => `https://player.videasy.to/tv/${id}/${s}/${e}`
   },
   {
-    name: 'VidFast',
+    name: 'Viduki · S1',
     status: 'green',
-    movie: (id) => `https://vidfast.vc/movie/${id}`,
-    tv: (id, s, e) => `https://vidfast.vc/tv/${id}/${s}/${e}`
+    movie: (id) => `https://viduki.net/1/movie/${id}`,
+    tv: (id, s, e) => `https://viduki.net/1/tv/${id}/${s}/${e}`
   },
   {
-    name: 'FreMbed',
+    name: 'Viduki · S2',
     status: 'green',
-    movie: (id) => `https://frembed.pro/api/film.php?id=${id}`,
-    tv: (id, s, e) => `https://frembed.pro/api/serie.php?id=${id}&sa=${s}&epi=${e}`
+    movie: (id) => `https://viduki.net/2/movie/${id}`,
+    tv: (id, s, e) => `https://viduki.net/2/tv/${id}/${s}/${e}`
   },
   {
-    name: 'NonTongo',
+    name: 'Viduki · S3',
     status: 'green',
-    movie: (id) => `https://www.nontongo.win/embed/movie/${id}`,
-    tv: (id, s, e) => `https://www.nontongo.win/embed/tv/${id}/${s}/${e}`
+    movie: (id) => `https://viduki.net/3/movie/${id}`,
+    tv: (id, s, e) => `https://viduki.net/3/tv/${id}/${s}/${e}`
   }
 ];
 
@@ -2547,11 +2535,12 @@ function buildServerTabs(id, type) {
       <div class="server-dropdown-panel" id="serverDropdownPanel">
         <div class="server-dropdown-label">Select Server</div>
         ${SERVERS.map((s, i) => `
-          <div class="server-dropdown-item ${i === currentServerIdx ? 'active' : ''}"
+          <div class="server-dropdown-item ${i === currentServerIdx ? 'active' : ''} ${s.isDefault ? 'viduki-default' : ''}"
                id="srvItem_${i}"
                onclick="selectServerDropdown(${i},${id},'${type}')">
             <span class="srv-status-dot ${s.status || 'green'}" id="srvDot_${i}"></span>
             <span>${s.name}</span>
+            ${s.isDefault ? '<span class="srv-default-badge">DEFAULT</span>' : ''}
           </div>
         `).join('')}
       </div>
@@ -2618,6 +2607,122 @@ function selectServerDropdown(idx, id, type) {
 
   selectServer(idx, id, type);
 }
+
+// ===== FULLSCREEN v3: Immersive fullscreen for Viduki iframe =====
+
+// Detect iOS (Safari doesn't support iframe.requestFullscreen)
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isAndroid = /Android/.test(navigator.userAgent);
+
+// Track pseudo-fullscreen state (iOS fallback)
+let pseudoFsActive = false;
+let pseudoFsUITimer = null;
+
+const FS_ICON_EXPAND = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`;
+const FS_ICON_COMPRESS = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>`;
+
+function updateFsButtons(isFs) {
+  const btn = document.getElementById('fsBtnCustom');
+  const topBtn = document.getElementById('fsTopbarBtn');
+  const icon = isFs ? FS_ICON_COMPRESS : FS_ICON_EXPAND;
+  const title = isFs ? 'Exit Fullscreen' : 'Fullscreen';
+  if (btn) { btn.innerHTML = icon; btn.title = title; }
+  if (topBtn) { topBtn.innerHTML = icon; topBtn.title = isFs ? 'Exit Fullscreen (F)' : 'Fullscreen (F)'; }
+}
+
+// ---- iOS Pseudo-Fullscreen ----
+function enterPseudoFs() {
+  pseudoFsActive = true;
+  document.body.classList.add('ios-pseudo-fs');
+  document.body.classList.add('show-ui');
+  updateFsButtons(true);
+  // Lock orientation to landscape if possible
+  try { screen.orientation && screen.orientation.lock('landscape').catch(()=>{}); } catch(e){}
+  // Auto-hide UI after 3s
+  clearTimeout(pseudoFsUITimer);
+  pseudoFsUITimer = setTimeout(() => document.body.classList.remove('show-ui'), 3000);
+  // Tap on player area toggles UI visibility
+  const cinema = document.getElementById('playerFrameCinema');
+  if (cinema) cinema.addEventListener('click', togglePseudoFsUI, {once:false});
+}
+
+function exitPseudoFs() {
+  pseudoFsActive = false;
+  document.body.classList.remove('ios-pseudo-fs', 'show-ui');
+  updateFsButtons(false);
+  clearTimeout(pseudoFsUITimer);
+  try { screen.orientation && screen.orientation.unlock && screen.orientation.unlock(); } catch(e){}
+  const cinema = document.getElementById('playerFrameCinema');
+  if (cinema) cinema.removeEventListener('click', togglePseudoFsUI);
+}
+
+function togglePseudoFsUI() {
+  clearTimeout(pseudoFsUITimer);
+  document.body.classList.toggle('show-ui');
+  if (document.body.classList.contains('show-ui')) {
+    pseudoFsUITimer = setTimeout(() => document.body.classList.remove('show-ui'), 3000);
+  }
+}
+
+// ---- Main fullscreen trigger (fsBtnCustom only) ----
+function triggerIframeFullscreen() {
+  // If already in pseudo-fs (iOS), exit it
+  if (pseudoFsActive) { exitPseudoFs(); return; }
+
+  // If already in native fullscreen, exit
+  const fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+  if (fsEl) {
+    const exitFs = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+    if (exitFs) exitFs.call(document).catch(()=>{});
+    return;
+  }
+
+  const frame = document.getElementById('playerFrame');
+  if (!frame) return;
+
+  // iOS Safari: requestFullscreen not supported on iframe → use pseudo-fullscreen
+  if (isIOS) {
+    enterPseudoFs();
+    return;
+  }
+
+  // Android Chrome: use {navigationUI:'hide'} to hide nav bar
+  const fsOptions = isAndroid ? { navigationUI: 'hide' } : {};
+
+  // Try requestFullscreen directly on the IFRAME element
+  const reqFn = frame.requestFullscreen || frame.webkitRequestFullscreen || frame.mozRequestFullScreen || frame.msRequestFullscreen;
+  if (reqFn) {
+    reqFn.call(frame, fsOptions)
+      .then(() => {
+        // Lock to landscape on Android after entering fullscreen
+        if (isAndroid) {
+          try { screen.orientation && screen.orientation.lock('landscape').catch(()=>{}); } catch(e){}
+        }
+      })
+      .catch(() => {
+        // iframe blocked fullscreen (cross-origin restriction) → fallback to pseudo-fs
+        enterPseudoFs();
+      });
+  } else {
+    // No Fullscreen API at all → pseudo-fs
+    enterPseudoFs();
+  }
+}
+
+// ---- Native fullscreen change handler ----
+function onFullscreenChange() {
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
+  updateFsButtons(isFs);
+  if (!isFs) {
+    // Unlock orientation on exit
+    try { screen.orientation && screen.orientation.unlock && screen.orientation.unlock(); } catch(e){}
+  }
+}
+document.addEventListener('fullscreenchange', onFullscreenChange);
+document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+document.addEventListener('mozfullscreenchange', onFullscreenChange);
+
+// ===== END FULLSCREEN v3 =====
 
 function getStreamUrl(id, type, serverIdx, season, episode) {
   const s = SERVERS[serverIdx] || SERVERS[0];
@@ -2690,12 +2795,18 @@ async function openPlayer() {
 
 // Close dedicated player view
 function closePlayer() {
+  // Exit pseudo-fs or native fullscreen before closing
+  if (pseudoFsActive) exitPseudoFs();
+  const fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+  if (fsEl) {
+    const exitFs = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
+    if (exitFs) exitFs.call(document).catch(()=>{});
+  }
   const pv = document.getElementById('playerView');
   pv.classList.remove('open');
   document.getElementById('playerFrame').src = '';
-  playerVisible = false; // FIX BUG 1: reset playerVisible
-  document.body.style.overflow = 'hidden'; // keep detail page scroll locked (detail is still open)
-  // Cleanup server dropdown outside-click listener
+  playerVisible = false;
+  document.body.style.overflow = 'hidden';
   document.removeEventListener('click', closeServerDropdownOutside);
 }
 
@@ -3181,17 +3292,31 @@ document.addEventListener('keydown', e => {
     document.getElementById('searchInput').focus();
   }
   if (e.key === 'Escape') {
-    // Always close player first (it's a special overlay above everything)
+    // 1. Exit iOS pseudo-fullscreen first
+    if (pseudoFsActive) { exitPseudoFs(); return; }
+    // 2. Exit native fullscreen (don't close player yet)
+    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
+    if (isFs) {
+      const exitFs = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
+      if (exitFs) exitFs.call(document).catch(() => {});
+      return;
+    }
+    // 3. Close player
     if (document.getElementById('playerView').classList.contains('open')) {
       closePlayer();
       return;
     }
-    // Then pop the topmost layer from the navigation stack
+    // 4. Pop nav stack
     if (NAV_STACK.length > 0) {
       const top = NAV_STACK[NAV_STACK.length - 1];
       if (top.type === 'detail') closeDetail();
       else if (top.type === 'actor') closeActor();
     }
+  }
+  // F key = toggle fullscreen when player is open
+  if ((e.key === 'f' || e.key === 'F') && document.getElementById('playerView').classList.contains('open') && document.activeElement.tagName !== 'INPUT') {
+    e.preventDefault();
+    triggerIframeFullscreen();
   }
 });
 
@@ -3688,7 +3813,7 @@ const TRANSLATIONS = {
     stAbout:'About', stVersion:'Version 23.0 — Built with TMDB API',
     stAboutDesc:'WipeStream is a free movie and TV streaming discovery app powered by The Movie Database (TMDB). All content metadata is provided by TMDB. Streaming is provided by third-party embed servers.',
     confirmLang:'Changing language will reload the page. Continue?', confirmHistory:'Clear all search history?', confirmWatchlist:'Clear your entire watchlist?', confirmAllData:'Clear ALL WipeStream data? This cannot be undone.',
-    ok:'OK', cancel:'Cancel', cleared:'Cleared!', braveTitle:'Better experience with Brave', braveSub:'Browse without ads and trackers',
+    ok:'OK', cancel:'Cancel', cleared:'Cleared!', braveTitle:'Use Brave Browser or uBlock Origin to block ads for the best experience.', braveSub:'Brave Browser or uBlock Origin extension — block ads & trackers for smoother streaming',
     mdlTitle:'Install StreamWipe', mdlSub:'Enjoy the best experience with our official app.',
     fAdBlock:'No Ads & Illegal Pop-ups', fSmooth:'Smoother Streaming (60 FPS)', fSubs:'Upload Custom Subtitles', fData:'Save Data & Fast Loading',
     btnNative:'Download Native APK', btnWeb:'Install via Browser'
@@ -3763,14 +3888,8 @@ function t(key) {
 }
 
 function applyTranslations() {
-  const ids = ['settingsTitle','settingsSubtitle','stAppearance','stThemePresets','stFont','stFontDesc','stAccent','stAccentDesc','stWallpaper','stWallpaperDesc','stOpacity','stOpacityDesc','stLanguage','stLangNote','stStorage','stClearHistory','stClearWatchlist','stClearAll','stAbout','stVersion','stAboutDesc', 'mdlTitle', 'mdlSub', 'fAdBlock', 'fSmooth', 'fSubs', 'fData'];
+  const ids = ['settingsTitle','settingsSubtitle','stAppearance','stThemePresets','stFont','stFontDesc','stAccent','stAccentDesc','stWallpaper','stWallpaperDesc','stOpacity','stOpacityDesc','stLanguage','stLangNote','stStorage','stClearHistory','stClearWatchlist','stClearAll','stAbout','stVersion','stAboutDesc'];
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = t(id); });
-
-  // Translation for buttons in modal
-  const btnNative = document.querySelector('.app-modal-btn.primary span') || document.querySelector('.app-modal-btn.primary');
-  if (btnNative) btnNative.textContent = t('btnNative');
-  const btnWeb = document.getElementById('mdlPwaBtn');
-  if (btnWeb) btnWeb.textContent = t('btnWeb');
 
   const si = document.getElementById('searchInput');
   if (si) si.placeholder = t('searchPlaceholder');
@@ -3870,44 +3989,9 @@ function showConfirm(msg, onOk) {
 }
 
 // ===== START =====
-function initWebApp() {
-  // Detect if running in Browser (Web) or App (WebView)
-  const isInApp = window.location.protocol === 'file:' || navigator.userAgent.includes('wv') || window.android;
-
-  if (!isInApp) {
-    // Show download modal EVERY TIME on Web
-    const modal = document.getElementById('appDownloadModal');
-    if (modal) {
-      setTimeout(() => { modal.style.display = 'flex'; }, 1000);
-    }
-
-    // Add Download button to Settings > About (Permanent)
-    const aboutSection = document.getElementById('acc-about').querySelector('.settings-section-body');
-    if (aboutSection) {
-      const dlBtn = document.createElement('a');
-      dlBtn.href = 'StreamWipe.apk';
-      dlBtn.download = 'StreamWipe.apk';
-      dlBtn.className = 'storage-btn';
-      dlBtn.style.marginTop = '12px';
-      dlBtn.style.borderColor = 'var(--accent)';
-      dlBtn.style.color = 'var(--accent)';
-      dlBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download StreamWipe APK (Native)`;
-      aboutSection.appendChild(dlBtn);
-    }
-  }
-}
-
-function dismissAppModal() {
-  const modal = document.getElementById('appDownloadModal');
-  if (modal) {
-    modal.style.animation = 'fadeOut 0.3s ease forwards';
-    setTimeout(() => { modal.style.display = 'none'; }, 300);
-  }
-  localStorage.setItem('wipestream_app_dismissed', '1');
-}
+// APK modal removed
 
 init();
-initWebApp();
 </script>
 
 <!-- ===== PWA: Manifest + Service Worker + Install Prompt ===== -->
@@ -3968,9 +4052,6 @@ self.addEventListener('fetch', e => {
     // Show install button in Settings > About
     const btn = document.getElementById('pwaInstallBtn');
     if (btn) btn.style.display = 'flex';
-    // Show in modal too
-    const modalBtn = document.getElementById('mdlPwaBtn');
-    if (modalBtn) modalBtn.style.display = 'flex';
   });
   window.addEventListener('appinstalled', () => {
     deferredPrompt = null;
