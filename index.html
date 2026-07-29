@@ -451,7 +451,7 @@ body.theme-retrovhs .hero-badge { background: transparent; border: 1px solid #ff
 
 /* ===== PLAYER ===== */
 /* ===== DEDICATED PLAYER VIEW ===== */
-.player-view{position:fixed;inset:0;z-index:2000;background:#000;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);overflow:visible}
+.player-view{position:fixed;inset:0;z-index:20000;background:#000;display:flex;flex-direction:column;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);overflow:visible}
 /* FULLSCREEN FIX: allow iframe fullscreen to escape container */
 .player-view:-webkit-full-screen{overflow:visible}
 .player-view:-moz-full-screen{overflow:visible}
@@ -2218,6 +2218,8 @@ window.onpopstate = function(event) {
     _navClosingFromButton = false;
     return;
   }
+  // FIX: Stop trailer on browser back navigation (hardware back button)
+  killTrailer();
   // Hardware back button (Android/browser) — close the TOP layer from NAV_STACK.
   // Use NAV_STACK to determine what's on top (handles detail-on-top-of-actor case).
   const playerViewEl = document.getElementById('playerView');
@@ -2276,10 +2278,13 @@ async function openDetail(id, type, autoPlay) {
   detailEl.classList.add('open');
   document.body.style.overflow = 'hidden';
   playerVisible = false;
+  // FIX: Stop previous trailer audio BEFORE loading new detail (prevents audio overlap)
+  killTrailer();
   // Close player view if open from previous film
   const pv = document.getElementById('playerView');
   if (pv.classList.contains('open')) {
     pv.classList.remove('open');
+    pv.style.zIndex = '20000'; // FIX: reset z-index when closing player
     document.getElementById('playerFrame').src = '';
   }
   document.getElementById('trailerSection').style.display = 'none';
@@ -2743,11 +2748,41 @@ async function selectServer(idx, id, type) {
   await loadStream(id, type, idx, currentSeason, currentEpisode);
 }
 
+// FIX: Enhanced killTrailer - pause via YouTube postMessage API first, then clear src
 function killTrailer() {
   const iframe = document.getElementById('trailerIframe');
-  if (iframe) iframe.src = '';
+  if (iframe) {
+    // Send YouTube IFrame API pause command before clearing src (prevents audio ghost)
+    try {
+      iframe.contentWindow && iframe.contentWindow.postMessage(
+        JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*'
+      );
+    } catch(e) {}
+    // Small delay then clear src to ensure pause command is received
+    setTimeout(() => { iframe.src = ''; }, 50);
+  }
   const ts = document.getElementById('trailerSection');
   if (ts) ts.style.display = 'none';
+}
+
+// FIX: Stop ALL media (trailer + player stream + any HTML5 video/audio) on navigation
+function stopAllMedia() {
+  // 1. Kill trailer iframe (YouTube)
+  killTrailer();
+  // 2. Stop player stream iframe if player is NOT visually open (background play)
+  const pv = document.getElementById('playerView');
+  const pvOpen = pv && pv.classList.contains('open');
+  if (!pvOpen) {
+    const playerFrame = document.getElementById('playerFrame');
+    if (playerFrame && playerFrame.src) {
+      playerFrame.src = '';
+      playerVisible = false;
+    }
+  }
+  // 3. Pause any HTML5 <video> or <audio> elements that may be playing
+  document.querySelectorAll('video, audio').forEach(el => {
+    try { el.pause(); el.currentTime = 0; } catch(e) {}
+  });
 }
 
 async function openPlayer() {
@@ -2785,6 +2820,10 @@ async function openPlayer() {
   buildServerTabs(id, type);
 
   // Open player view (slides up from bottom)
+  // FIX: Always set player-view z-index ABOVE the highest NAV_STACK layer
+  // so it appears on top even when opened from actor page (z-index 4000+) or nested detail (6000+)
+  const topNavZ = NAV_STACK.length > 0 ? Math.max(...NAV_STACK.map(e => e.zIndex)) : 0;
+  pv.style.zIndex = String(Math.max(topNavZ + 1000, 20000));
   pv.classList.add('open');
   document.body.style.overflow = 'hidden';
   playerVisible = true; // FIX BUG 1: set playerVisible=true so back button works
@@ -2804,6 +2843,8 @@ function closePlayer() {
   }
   const pv = document.getElementById('playerView');
   pv.classList.remove('open');
+  // FIX: Reset z-index to base after closing so it doesn't block other layers
+  pv.style.zIndex = '20000';
   document.getElementById('playerFrame').src = '';
   playerVisible = false;
   document.body.style.overflow = 'hidden';
@@ -3019,6 +3060,8 @@ function showPage(page, fromPopState = false) {
   if (page !== 'home' && !fromPopState) {
     history.pushState({ view: 'page', page }, '');
   }
+  // FIX BUG: Stop ALL media (trailer YouTube + player stream) on every page navigation
+  stopAllMedia();
   currentPage = page;
   const pages = ['home', 'movies', 'tv', 'trending', 'toprated', 'upcoming', 'watchlist', 'search', 'settings'];
   pages.forEach(p => {
